@@ -1,9 +1,8 @@
 import express, { Request, Response, Application } from 'express';
-import { pool } from './src/db';
-import dotenv from 'dotenv';
 import cors from 'cors';
-
-dotenv.config(); // for env file
+import dotenv from 'dotenv';
+dotenv.config();
+import { pool } from './src/db';
 
 const app: Application = express();
 const port = process.env.PORT || 8000;
