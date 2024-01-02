@@ -11,7 +11,7 @@ async function isAuthenticated(
   next: NextFunction
 ) {
   const tokenObj = extractJwtToken(req);
-  if (!tokenObj.success) res.status(401).send('Unauthorized');
+  if (!tokenObj.success) return res.status(401).send('Unauthorized');
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(tokenObj.token);

@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 export function extractJwtToken(req: Request) {
   const result = { success: false, token: '' };

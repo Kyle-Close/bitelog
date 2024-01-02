@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../auth/authenticate';
+import { isAuthorized } from '../auth/authorized';
 
 const router = express.Router();
 
