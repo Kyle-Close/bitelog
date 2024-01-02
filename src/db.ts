@@ -1,14 +1,16 @@
-import { Pool } from 'pg';
-import fs from 'fs';
+import { Sequelize } from 'sequelize';
 
-export const pool = new Pool({
-  user: process.env.DB_USER,
+const user = process.env.DB_USER ? process.env.DB_USER : '';
+const dbName = process.env.DB_DATABASE ? process.env.DB_DATABASE : '';
+const pass = process.env.DB_PASS ? process.env.DB_PASS : '';
+
+export const sequelize = new Sequelize(dbName, user, pass, {
   host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASS,
   port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-    ca: fs.readFileSync('./global-bundle.pem').toString(),
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 });
