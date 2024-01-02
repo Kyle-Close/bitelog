@@ -4,18 +4,6 @@ import { sequelize } from '../db';
 const Eat_Food_Log = sequelize.define(
   'Eat_Food_Log',
   {
-    journal_id: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    food_id: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    measurement_id: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     amount: {
       type: DataTypes.INTEGER,
       allowNull: true,

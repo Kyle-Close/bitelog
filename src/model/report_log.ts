@@ -4,10 +4,6 @@ import { sequelize } from '../db';
 const Report_Log = sequelize.define(
   'Report_Log',
   {
-    journal_id: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
     discomfort_rating: {
       type: DataTypes.ENUM,
       allowNull: false,

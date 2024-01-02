@@ -7,7 +7,6 @@ import Ingredient from '../model/ingredient';
 const router = express.Router();
 
 router.get('/', isAuthenticated, (req: Request, res: Response) => {
-  //console.log(res.locals);
   const a = async () => {
     try {
       const users = await Ingredient.findAll();

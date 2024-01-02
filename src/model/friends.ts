@@ -1,18 +1,27 @@
 import { sequelize } from '../db';
 import { DataTypes } from 'sequelize';
+import User from './user';
 
 const Friends = sequelize.define(
   'Friends',
   {
-    user1_id: {
-      type: DataTypes.STRING,
+    user1Id: {
+      type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
+      references: {
+        model: User,
+        key: 'id',
+      },
     },
-    user2_id: {
-      type: DataTypes.STRING,
+    user2Id: {
+      type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
+      references: {
+        model: User,
+        key: 'id',
+      },
     },
   },
   {

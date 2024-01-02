@@ -7,7 +7,6 @@ const User = sequelize.define(
     id: {
       type: DataTypes.TEXT,
       primaryKey: true,
-      allowNull: false,
     },
     username: {
       type: DataTypes.STRING,
@@ -17,14 +16,9 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    created_on: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
   },
   {
     tableName: 'users',
-    timestamps: false,
   }
 );
 

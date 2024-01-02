@@ -2,12 +2,12 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
 import User from './user';
 
-const Journal = sequelize.define(
-  'Journal',
+const User_food = sequelize.define(
+  'User_food',
   {
     name: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     userId: {
       type: DataTypes.TEXT,
@@ -19,9 +19,9 @@ const Journal = sequelize.define(
     },
   },
   {
-    tableName: 'journals',
+    tableName: 'foods',
     timestamps: false,
   }
 );
 
-export default Journal;
+export default User_food;

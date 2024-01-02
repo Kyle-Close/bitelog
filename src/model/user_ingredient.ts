@@ -6,7 +6,7 @@ import Ingredient from './ingredient';
 const User_Ingredient = sequelize.define(
   'User_Ingredient',
   {
-    user_id: {
+    userId: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
@@ -15,7 +15,7 @@ const User_Ingredient = sequelize.define(
         key: 'id',
       },
     },
-    ingredient_id: {
+    ingredientId: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
