@@ -4,7 +4,7 @@ import { sequelize } from '../db';
 const Ingredient = sequelize.define(
   'Ingredient',
   {
-    name: {
+    Name: {
       type: DataTypes.STRING,
     },
   },

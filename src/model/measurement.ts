@@ -4,11 +4,11 @@ import { sequelize } from '../db';
 const Measurement = sequelize.define(
   'Measurement',
   {
-    full_name: {
+    Full_Name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    abbreviation: {
+    Abbreviation: {
       type: DataTypes.STRING,
       allowNull: false,
     },

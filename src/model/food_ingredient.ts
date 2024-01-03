@@ -1,21 +1,21 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
 import Ingredient from './ingredient';
-import User_food from './user_food';
+import User_Food from './user_food';
 
 const Food_Ingredient = sequelize.define(
   'Food_Ingredient',
   {
-    foodId: {
+    FoodId: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: User_food,
+        model: User_Food,
         key: 'id',
       },
     },
-    ingredientId: {
+    IngredientId: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,

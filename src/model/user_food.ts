@@ -2,14 +2,14 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
 import User from './user';
 
-const User_food = sequelize.define(
-  'User_food',
+const User_Food = sequelize.define(
+  'User_Food',
   {
-    name: {
+    Name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    userId: {
+    UserId: {
       type: DataTypes.TEXT,
       allowNull: false,
       references: {
@@ -19,9 +19,9 @@ const User_food = sequelize.define(
     },
   },
   {
-    tableName: 'foods',
+    tableName: 'user_foods',
     timestamps: false,
   }
 );
 
-export default User_food;
+export default User_Food;

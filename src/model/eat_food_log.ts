@@ -4,15 +4,15 @@ import { sequelize } from '../db';
 const Eat_Food_Log = sequelize.define(
   'Eat_Food_Log',
   {
-    amount: {
+    Amount: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    notes: {
+    Notes: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    timestamp: {
+    Timestamp: {
       type: DataTypes.DATE,
       allowNull: false,
     },

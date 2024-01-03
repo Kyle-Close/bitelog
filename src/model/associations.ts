@@ -6,7 +6,7 @@ import Eat_Food_Log from './eat_food_log';
 import Measurement from './measurement';
 import Report_Log from './report_log';
 import { sequelize } from '../db';
-import User_food from './user_food';
+import User_Food from './user_food';
 
 const associations = () => {
   // Journal
@@ -17,8 +17,8 @@ const associations = () => {
   Eat_Food_Log.hasOne(Journal);
   Journal.hasMany(Eat_Food_Log);
 
-  Eat_Food_Log.hasOne(User_food);
-  User_food.hasMany(Eat_Food_Log);
+  Eat_Food_Log.hasOne(User_Food);
+  User_Food.hasMany(Eat_Food_Log);
 
   Eat_Food_Log.hasOne(Measurement);
   Measurement.hasMany(Eat_Food_Log);
@@ -28,12 +28,12 @@ const associations = () => {
   Journal.hasMany(Report_Log);
 
   // User_Foods
-  User_food.belongsTo(User);
-  User.hasMany(User_food);
+  User_Food.belongsTo(User);
+  User.hasMany(User_Food);
 
   // Food_Ingredients
-  User_food.belongsToMany(Ingredient, { through: Food_Ingredient });
-  Ingredient.belongsToMany(User_food, { through: Food_Ingredient });
+  User_Food.belongsToMany(Ingredient, { through: Food_Ingredient });
+  Ingredient.belongsToMany(User_Food, { through: Food_Ingredient });
 
   sequelize.sync();
 };

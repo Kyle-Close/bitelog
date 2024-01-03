@@ -4,15 +4,16 @@ import { sequelize } from '../db';
 const Report_Log = sequelize.define(
   'Report_Log',
   {
-    discomfort_rating: {
+    Discomfort_rating: {
       type: DataTypes.ENUM,
+      values: ['1', '2', '3', '4', '5'],
       allowNull: false,
     },
-    notes: {
+    Notes: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    timestamp: {
+    Timestamp: {
       type: DataTypes.DATE,
       allowNull: false,
     },

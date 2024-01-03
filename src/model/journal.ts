@@ -5,11 +5,11 @@ import User from './user';
 const Journal = sequelize.define(
   'Journal',
   {
-    name: {
+    Name: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    userId: {
+    UserId: {
       type: DataTypes.TEXT,
       allowNull: false,
       references: {

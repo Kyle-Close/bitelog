@@ -5,7 +5,7 @@ import User from './user';
 const Friends = sequelize.define(
   'Friends',
   {
-    user1Id: {
+    User1Id: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
@@ -14,7 +14,7 @@ const Friends = sequelize.define(
         key: 'id',
       },
     },
-    user2Id: {
+    User2Id: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
