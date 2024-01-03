@@ -4,17 +4,17 @@ import { sequelize } from '../db';
 const Measurement = sequelize.define(
   'Measurement',
   {
-    Full_Name: {
+    full_name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    Abbreviation: {
+    abbreviation: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
-    tableName: 'measurements',
+    tableName: 'Measurements',
     timestamps: false,
   }
 );

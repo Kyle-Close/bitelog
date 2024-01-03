@@ -4,12 +4,12 @@ import { sequelize } from '../db';
 const Ingredient = sequelize.define(
   'Ingredient',
   {
-    Name: {
+    name: {
       type: DataTypes.STRING,
     },
   },
   {
-    tableName: 'ingredients',
+    tableName: 'Ingredients',
     timestamps: false,
   }
 );

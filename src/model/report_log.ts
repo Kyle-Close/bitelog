@@ -1,27 +1,22 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
 
-const Report_Log = sequelize.define(
-  'Report_Log',
+const ReportLogs = sequelize.define(
+  'ReportLogs',
   {
-    Discomfort_rating: {
+    discomfort_rating: {
       type: DataTypes.ENUM,
       values: ['1', '2', '3', '4', '5'],
       allowNull: false,
     },
-    Notes: {
+    notes: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    Timestamp: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
   },
   {
-    tableName: 'report_logs',
-    timestamps: false,
+    tableName: 'ReportLogs',
   }
 );
 
-export default Report_Log;
+export default ReportLogs;

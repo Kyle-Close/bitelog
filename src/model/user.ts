@@ -1,25 +1,25 @@
 import { sequelize } from '../db';
 import { DataTypes } from 'sequelize';
 
-const User = sequelize.define(
-  'User',
+const Users = sequelize.define(
+  'Users',
   {
     id: {
       type: DataTypes.TEXT,
       primaryKey: true,
     },
-    Username: {
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    Email: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
-    tableName: 'users',
+    tableName: 'Users',
   }
 );
 
-export default User;
+export default Users;

@@ -1,31 +1,31 @@
 import { sequelize } from '../db';
 import { DataTypes } from 'sequelize';
-import User from './user';
+import Users from './user';
 
 const Friends = sequelize.define(
   'Friends',
   {
-    User1Id: {
+    user1Id: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: User,
+        model: Users,
         key: 'id',
       },
     },
-    User2Id: {
+    user2Id: {
       type: DataTypes.TEXT,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: User,
+        model: Users,
         key: 'id',
       },
     },
   },
   {
-    tableName: 'friends',
+    tableName: 'Friends',
     timestamps: false,
   }
 );

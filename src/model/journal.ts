@@ -1,17 +1,16 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
-import User from './user';
 
 const Journal = sequelize.define(
   'Journal',
   {
-    Name: {
+    name: {
       type: DataTypes.STRING,
       allowNull: true,
     },
   },
   {
-    tableName: 'journals',
+    tableName: 'Journals',
     timestamps: false,
   }
 );

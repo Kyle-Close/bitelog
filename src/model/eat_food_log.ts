@@ -4,22 +4,17 @@ import { sequelize } from '../db';
 const EatFoodLogs = sequelize.define(
   'EatFoodLogs',
   {
-    Amount: {
+    amount: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    Notes: {
+    notes: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
-    Timestamp: {
-      type: DataTypes.DATE,
-      allowNull: false,
     },
   },
   {
     tableName: 'EatFoodLogs',
-    timestamps: false,
   }
 );
 

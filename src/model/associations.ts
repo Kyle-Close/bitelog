@@ -1,51 +1,44 @@
 import Ingredient from './ingredient';
 import Journal from './journal';
-import User from './user';
+import Users from './user';
 import EatFoodLogs from './eat_food_log';
 import Measurement from './measurement';
-import Report_Log from './report_log';
+import ReportLogs from './report_log';
 import { sequelize } from '../db';
-import User_Food from './user_food';
+import UserFoods from './user_food';
 
 const associations = () => {
   // Journal
-  User.hasMany(Journal);
-  Journal.belongsTo(User);
+  Users.hasMany(Journal);
+  Journal.belongsTo(Users);
 
   // Eat_Food_Logs
-  EatFoodLogs.hasOne(Journal);
-  Journal.hasMany(EatFoodLogs);
-
-  EatFoodLogs.hasOne(User_Food);
-  User_Food.hasMany(EatFoodLogs);
-
-  EatFoodLogs.hasOne(Measurement);
-  Measurement.hasMany(EatFoodLogs);
+  EatFoodLogs.belongsTo(Journal);
+  EatFoodLogs.belongsTo(UserFoods);
+  EatFoodLogs.belongsTo(Measurement);
 
   // Report_Logs
-  Report_Log.hasOne(Journal);
-  Journal.hasMany(Report_Log);
+  ReportLogs.belongsTo(Journal);
 
   // User_Foods
-  User_Food.belongsTo(User);
-  User.hasMany(User_Food);
+  UserFoods.belongsTo(Users);
 
   // Food_Ingredients
-  User_Food.belongsToMany(Ingredient, {
+  UserFoods.belongsToMany(Ingredient, {
     through: 'FoodIngredients',
     timestamps: false,
   });
-  Ingredient.belongsToMany(User_Food, {
+  Ingredient.belongsToMany(UserFoods, {
     through: 'FoodIngredients',
     timestamps: false,
   });
 
   // User_Ingredients
-  User.belongsToMany(Ingredient, {
+  Users.belongsToMany(Ingredient, {
     through: 'UserIngredients',
     timestamps: false,
   });
-  Ingredient.belongsToMany(User, {
+  Ingredient.belongsToMany(Users, {
     through: 'UserIngredients',
     timestamps: false,
   });
