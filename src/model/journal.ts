@@ -9,14 +9,6 @@ const Journal = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    UserId: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
-    },
   },
   {
     tableName: 'journals',

@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
 
-const Eat_Food_Log = sequelize.define(
-  'Eat_Food_Log',
+const EatFoodLogs = sequelize.define(
+  'EatFoodLogs',
   {
     Amount: {
       type: DataTypes.INTEGER,
@@ -18,9 +18,9 @@ const Eat_Food_Log = sequelize.define(
     },
   },
   {
-    tableName: 'eat_food_logs',
+    tableName: 'EatFoodLogs',
     timestamps: false,
   }
 );
 
-export default Eat_Food_Log;
+export default EatFoodLogs;

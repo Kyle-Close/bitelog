@@ -8,15 +8,7 @@ const User_Food = sequelize.define(
     Name: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    UserId: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
-    },
+    }
   },
   {
     tableName: 'user_foods',
