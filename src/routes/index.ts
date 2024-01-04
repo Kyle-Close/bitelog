@@ -1,22 +1,15 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { isAuthenticated } from '../auth/authenticate';
+import { addNewUserIngredient } from '../controllers/ingredients';
 import { isAuthorized } from '../auth/authorized';
-import { sequelize } from '../db';
-import Ingredient from '../model/ingredient';
 
 const router = express.Router();
 
-router.get('/', isAuthenticated, (req: Request, res: Response) => {
-  const a = async () => {
-    try {
-      const users = await Ingredient.findAll();
-      console.log(users);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  a();
-  res.json({ msg: 'Welcome!' });
-});
+router.post(
+  '/ingredients/:id',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin', 'user'], allowSameUser: true }),
+  addNewUserIngredient
+);
 
 export default router;

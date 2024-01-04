@@ -6,7 +6,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import router from './routes';
 import serviceAccount from '../bitelog-firebase.json';
-import associations from './model/associations';
+import associations from './models/associations';
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
