@@ -37,13 +37,30 @@ export const addNewUserIngredient = asyncHandler(
     }
 
     // Check if ingredient exists in users list
-    const results = await Ingredient.findOne({
+    const userIngredient = await Ingredient.findOne({
       where: { name: req.body.name },
       include: Users,
     });
 
-    console.log(results?.dataValues);
+    if (userIngredient) {
+      res
+        .status(400)
+        .json({
+          err: `${req.body.name} already exists in user ingredient table`,
+        });
+      return;
+    }
 
+    // Check if ingredient exists in global table
+    const ingredient = await Ingredient.findOne({
+      where: { name: req.body.name },
+    });
+
+    if (!ingredient) {
+      // Add the ingredient to global table
+    } else {
+      // Use the ingredient to add to user table
+    }
     res.send('Ingredient added successfully');
     return;
     // Note: No need to return the response object
