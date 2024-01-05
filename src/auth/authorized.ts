@@ -10,12 +10,12 @@ interface IsAuthorizedOptions {
 function isAuthorized(options: IsAuthorizedOptions) {
   return function (req: Request, res: Response, next: NextFunction) {
     const { role, email, uid } = res.locals;
-    const { id } = req.params;
+    const { userId } = req.params;
 
     // Give myself access to all routes
     if (email === 'k.james.close@gmail.com') return next();
     // Optionally allow user to access their own stuff
-    if (options.allowSameUser && id && id === uid) return next();
+    if (options.allowSameUser && userId && userId === uid) return next();
 
     if (options.hasRole.includes(role)) return next();
     return res.status(403).send('Unauthorized');

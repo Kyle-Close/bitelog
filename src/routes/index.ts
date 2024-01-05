@@ -6,7 +6,7 @@ import { isAuthorized } from '../auth/authorized';
 const router = express.Router();
 
 router.post(
-  '/ingredients/:id',
+  '/user/:userId/ingredients/:ingredientId',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin', 'user'], allowSameUser: true }),
   addNewUserIngredient
