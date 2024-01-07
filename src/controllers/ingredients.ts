@@ -1,26 +1,10 @@
-/*
-  Create: when a user wants to add an ingredient to their list but the value doesn't exist here
-  Read: return list of all ingredients
-  Update: don't allow
-  Delete: don't allow
-*/
-
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import Users from '../models/user';
 import Ingredient from '../models/ingredient';
 
-// When a user attempts to add a ingredient
-
-//  - check if user is logged in, if not, abort
-//  - check if ingredient exists in their list
-//    - if exists, no need to add it, abort
-//  - check if ingredient exists in the global table
-//    - if exists, then add the reference to the user list
-//    - if does not exist, then ahgjdd it to the global table, then add it to user list
-
-export const addNewUserIngredient = asyncHandler(
+export const createNewUserIngredient = asyncHandler(
   async (req: Request, res: Response) => {
     body('name')
       .isString()
@@ -97,6 +81,33 @@ export const addNewUserIngredient = asyncHandler(
           .json({ err: 'Could not complete insert into user table.' });
         return;
       }
+    }
+  }
+);
+
+export const getUserIngredients = asyncHandler(
+  async (req: Request, res: Response) => {
+    const ingredients = (await Users.findByPk(res.locals.uid, {
+      include: [
+        {
+          model: Ingredient,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    })) as any;
+
+    if (ingredients) {
+      const ingredientArray = ingredients.Ingredients;
+      res.status(200).json({
+        msg: 'Successfully retrieved user ingredients.',
+        ingredients: ingredientArray,
+      });
+      return;
+    } else {
+      res.status(400).json({ err: 'Could not retrieve user ingredients.' });
+      return;
     }
   }
 );
