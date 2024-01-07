@@ -112,6 +112,10 @@ export const getUserIngredients = asyncHandler(
   }
 );
 
+export const deleteUserIngredient = asyncHandler(
+  async (req: Request, res: Response) => {}
+);
+
 const addIngredientToUserTable = async (res: Response, req: Request) => {
   // Add the ingredient to the user ingredient table
   const UserInstance = (await Users.findByPk(res.locals.uid)) as any;
