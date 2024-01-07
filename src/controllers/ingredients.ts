@@ -8,7 +8,6 @@
 import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
-import { sequelize } from '../db';
 import Users from '../models/user';
 import Ingredient from '../models/ingredient';
 
@@ -58,17 +57,61 @@ export const addNewUserIngredient = asyncHandler(
     }
 
     // Check if ingredient exists in global table
-    /*     const globalIngredient = await Ingredient.findOne({
+    const globalIngredientInstance = await Ingredient.findOne({
       where: { name: req.body.name },
     });
 
-    if (!globalIngredient) {
+    if (!globalIngredientInstance) {
       // Add the ingredient to global table
+      const addedGlobalIngredient = await Ingredient.create({
+        name: req.body.name,
+      });
+
+      if (addedGlobalIngredient) {
+        const result = await addIngredientToUserTable(res, req);
+        if (result) {
+          res.status(201).json({
+            msg: 'Ingredient added successfully',
+            ingredient: result[0].dataValues,
+          });
+          return;
+        } else {
+          res
+            .status(400)
+            .json({ err: 'Could not complete insert into user table.' });
+          return;
+        }
+      }
     } else {
       // Use the ingredient to add to user table
-    } */
-    res.send('Ingredient added successfully');
-    return;
-    // Note: No need to return the response object
+      const result = await addIngredientToUserTable(res, req);
+      if (result) {
+        res.status(201).json({
+          msg: 'Ingredient added successfully',
+          ingredient: result[0].dataValues,
+        });
+        return;
+      } else {
+        res
+          .status(400)
+          .json({ err: 'Could not complete insert into user table.' });
+        return;
+      }
+    }
   }
 );
+
+const addIngredientToUserTable = async (res: Response, req: Request) => {
+  // Add the ingredient to the user ingredient table
+  const UserInstance = (await Users.findByPk(res.locals.uid)) as any;
+
+  const addedGlobalIngredientInstance = await Ingredient.findOne({
+    where: { name: req.body.name },
+  });
+
+  const result = await UserInstance.addIngredient(
+    addedGlobalIngredientInstance
+  );
+
+  return result;
+};
