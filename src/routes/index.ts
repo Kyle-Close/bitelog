@@ -4,11 +4,14 @@ import {
   createNewUserIngredient,
   deleteManyUserIngredient,
   deleteUserIngredient,
+  getIngredients,
   getUserIngredients,
 } from '../controllers/ingredients';
 import { isAuthorized } from '../auth/authorized';
 
 const router = express.Router();
+
+router.get('/ingredients', getIngredients);
 
 router.get(
   '/user/:userId/ingredients',

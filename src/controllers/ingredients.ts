@@ -112,6 +112,19 @@ export const getUserIngredients = asyncHandler(
   }
 );
 
+export const getIngredients = async (req: Request, res: Response) => {
+  const ingredients = await Ingredient.findAll();
+  if (ingredients) {
+    res
+      .status(200)
+      .json({ msg: 'Successfully retrieved list of ingredients', ingredients });
+    return;
+  } else {
+    res.status(400).json({ err: 'Could not retrieve list of ingredients' });
+    return;
+  }
+};
+
 export const deleteUserIngredient = asyncHandler(
   async (req: Request, res: Response) => {
     param('ingredientId').isInt().withMessage('User ID must be an integer');
