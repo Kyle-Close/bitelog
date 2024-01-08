@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import Users from '../models/user';
 import Ingredient from '../models/ingredient';
@@ -113,7 +113,33 @@ export const getUserIngredients = asyncHandler(
 );
 
 export const deleteUserIngredient = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    param('ingredientId').isInt().withMessage('User ID must be an integer');
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ err: 'Invalid ingredient id' });
+      return;
+    }
+
+    const ingredientId = req.params.ingredientId;
+    const userId = res.locals.uid;
+
+    // Find the user instance
+    const userInstance = (await Users.findByPk(userId)) as any;
+    if (!userInstance) {
+      res.status(404).json({ err: 'User not found' });
+      return;
+    }
+
+    // Remove the ingredient from the user's list
+    try {
+      await userInstance.removeIngredient(ingredientId);
+      res.status(200).json({ msg: 'Ingredient removed successfully' });
+    } catch (error) {
+      res.status(500).json({ err: 'Error removing ingredient from user' });
+    }
+  }
 );
 
 const addIngredientToUserTable = async (res: Response, req: Request) => {
