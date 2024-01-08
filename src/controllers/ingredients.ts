@@ -118,7 +118,7 @@ export const deleteUserIngredient = asyncHandler(
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ err: 'Invalid ingredient id' });
+      res.status(400).json({ err: errors.array() });
       return;
     }
 
@@ -138,6 +138,38 @@ export const deleteUserIngredient = asyncHandler(
       res.status(200).json({ msg: 'Ingredient removed successfully' });
     } catch (error) {
       res.status(500).json({ err: 'Error removing ingredient from user' });
+    }
+  }
+);
+
+export const deleteManyUserIngredient = asyncHandler(
+  async (req: Request, res: Response) => {
+    body('ingredientIds')
+      .isArray({ min: 1 })
+      .withMessage("Expected list of user ID's");
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ err: errors.array() });
+      return;
+    }
+
+    const userId = res.locals.uid;
+    const ingredientIdList = req.body.ingredientIds;
+
+    // Find the user instance
+    const userInstance = (await Users.findByPk(userId)) as any;
+    if (!userInstance) {
+      res.status(404).json({ err: 'User not found' });
+      return;
+    }
+
+    // Remove the ingredient from the user's list
+    try {
+      await userInstance.removeIngredients(ingredientIdList);
+      res.status(200).json({ msg: 'Ingredients removed successfully' });
+    } catch (error) {
+      res.status(500).json({ err: 'Error removing ingredients from user' });
     }
   }
 );

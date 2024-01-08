@@ -2,6 +2,7 @@ import express from 'express';
 import { isAuthenticated } from '../auth/authenticate';
 import {
   createNewUserIngredient,
+  deleteManyUserIngredient,
   deleteUserIngredient,
   getUserIngredients,
 } from '../controllers/ingredients';
@@ -21,6 +22,13 @@ router.post(
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   createNewUserIngredient
+);
+
+router.delete(
+  '/user/:userId/ingredients',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  deleteManyUserIngredient
 );
 
 router.delete(
