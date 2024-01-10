@@ -47,7 +47,6 @@ export const createUserIngredient = [
 
       // Use the ingredient to add to user table
       const userInstance: any = await getUserInstance(res.locals.uid); // res.locals.userInstance
-
       const createdIngredient = await userInstance.addIngredient(
         globalIngredientInstance
       );
