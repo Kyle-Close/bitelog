@@ -4,86 +4,67 @@ import asyncHandler from 'express-async-handler';
 import Users from '../models/user';
 import Ingredient from '../models/ingredient';
 
-export const createNewUserIngredient = asyncHandler(
-  async (req: Request, res: Response) => {
-    body('name')
-      .isString()
-      .trim()
-      .isLength({ min: 2, max: 50 })
-      .withMessage('Ingredient name must be between 2 & 50 characters.')
-      .escape();
+export const createUserIngredient = [
+  body('name')
+    .isString()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Ingredient name must be between 2 & 50 characters.')
+    .escape(),
 
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ err: errors.array() });
       return;
     }
 
-    // Check if ingredient exists in users list
-    const userIngredient = await Ingredient.findOne({
-      where: { name: req.body.name },
-      include: [
-        {
-          model: Users,
-          where: { id: res.locals.uid },
-          through: {
-            attributes: [],
-          },
-        },
-      ],
-    });
+    try {
+      // Check if ingredient exists in users list
+      const userIngredient = await getUserIngredientInstanceByName(
+        res.locals.uid,
+        req.body.name
+      );
 
-    if (userIngredient) {
-      res.status(400).json({
-        err: `${req.body.name} already exists in user ingredient table`,
-      });
-      return;
-    }
-
-    // Check if ingredient exists in global table
-    const globalIngredientInstance = await Ingredient.findOne({
-      where: { name: req.body.name },
-    });
-
-    if (!globalIngredientInstance) {
-      // Add the ingredient to global table
-      const addedGlobalIngredient = await Ingredient.create({
-        name: req.body.name,
-      });
-
-      if (addedGlobalIngredient) {
-        const result = await addIngredientToUserTable(res, req);
-        if (result) {
-          res.status(201).json({
-            msg: 'Ingredient added successfully',
-            ingredient: result[0].dataValues,
-          });
-          return;
-        } else {
-          res
-            .status(400)
-            .json({ err: 'Could not complete insert into user table.' });
-          return;
-        }
-      }
-    } else {
-      // Use the ingredient to add to user table
-      const result = await addIngredientToUserTable(res, req);
-      if (result) {
-        res.status(201).json({
-          msg: 'Ingredient added successfully',
-          ingredient: result[0].dataValues,
+      if (userIngredient) {
+        res.status(400).json({
+          err: `${req.body.name} already exists in user ingredient table`,
         });
         return;
-      } else {
-        res
-          .status(400)
-          .json({ err: 'Could not complete insert into user table.' });
+      }
+
+      // Check if ingredient exists in global table
+      let globalIngredientInstance = await getGlobalIngredientInstance(req);
+
+      if (!globalIngredientInstance) {
+        // Add the ingredient to global table
+        globalIngredientInstance = await createGlobalIngredient(req);
+
+        if (!globalIngredientInstance) {
+          res.status(400).json({ err: 'Error creating global ingredient.' });
+        }
+      }
+
+      // Use the ingredient to add to user table
+      const userInstance: any = await getUserInstance(res.locals.uid); // res.locals.userInstance
+
+      const createdIngredient = await userInstance.addIngredient(
+        globalIngredientInstance
+      );
+
+      if (!createdIngredient) {
+        res.status(400).json({ msg: 'Error creating user ingredient.' });
         return;
       }
+
+      res.status(201).json({ msg: 'Successfully created user ingredient.' });
+    } catch (error) {
+      // Handle errors here
+      res.status(500).json({ err: 'An error occurred.' });
     }
-  }
-);
+    return;
+  }),
+];
 
 export const getUserIngredients = asyncHandler(
   async (req: Request, res: Response) => {
@@ -112,18 +93,21 @@ export const getUserIngredients = asyncHandler(
   }
 );
 
-export const getIngredients = async (req: Request, res: Response) => {
-  const ingredients = await Ingredient.findAll();
-  if (ingredients) {
-    res
-      .status(200)
-      .json({ msg: 'Successfully retrieved list of ingredients', ingredients });
-    return;
-  } else {
-    res.status(400).json({ err: 'Could not retrieve list of ingredients' });
-    return;
+export const getIngredients = asyncHandler(
+  async (req: Request, res: Response) => {
+    const ingredients = await Ingredient.findAll();
+    if (ingredients) {
+      res.status(200).json({
+        msg: 'Successfully retrieved list of ingredients',
+        ingredients,
+      });
+      return;
+    } else {
+      res.status(400).json({ err: 'Could not retrieve list of ingredients' });
+      return;
+    }
   }
-};
+);
 
 export const deleteUserIngredient = asyncHandler(
   async (req: Request, res: Response) => {
@@ -187,17 +171,41 @@ export const deleteManyUserIngredient = asyncHandler(
   }
 );
 
-const addIngredientToUserTable = async (res: Response, req: Request) => {
-  // Add the ingredient to the user ingredient table
-  const UserInstance = (await Users.findByPk(res.locals.uid)) as any;
+const getUserIngredientInstanceByName = async (uid: string, name: string) => {
+  const userIngredient = Ingredient.findOne({
+    where: { name: name },
+    include: [
+      {
+        model: Users,
+        where: { id: uid },
+        through: {
+          attributes: [],
+        },
+      },
+    ],
+  });
 
-  const addedGlobalIngredientInstance = await Ingredient.findOne({
+  return userIngredient;
+};
+
+const createGlobalIngredient = async (req: Request) => {
+  const createdGlobalIngredient = Ingredient.create({
+    name: req.body.name,
+  });
+
+  return createdGlobalIngredient;
+};
+
+const getUserInstance = async (userId: string) => {
+  const userInstance = Users.findByPk(userId);
+
+  return userInstance;
+};
+
+const getGlobalIngredientInstance = async (req: Request) => {
+  const globalIngredientInstance = Ingredient.findOne({
     where: { name: req.body.name },
   });
 
-  const result = await UserInstance.addIngredient(
-    addedGlobalIngredientInstance
-  );
-
-  return result;
+  return globalIngredientInstance;
 };
