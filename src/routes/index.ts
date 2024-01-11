@@ -28,17 +28,17 @@ router.post(
 );
 
 router.delete(
-  '/user/:userId/ingredients',
-  isAuthenticated,
-  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  deleteManyUserIngredient
-);
-
-router.delete(
   '/user/:userId/ingredients/:ingredientId',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   deleteUserIngredient
+);
+
+router.delete(
+  '/user/:userId/ingredients',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  deleteManyUserIngredient
 );
 
 export default router;

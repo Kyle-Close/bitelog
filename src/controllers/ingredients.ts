@@ -67,7 +67,7 @@ export const createUserIngredient = [
 
 export const getUserIngredients = asyncHandler(
   async (req: Request, res: Response) => {
-    const ingredients = (await Users.findByPk(res.locals.uid, {
+    const ingredients: any = await Users.findByPk(res.locals.uid, {
       include: [
         {
           model: Ingredient,
@@ -76,7 +76,7 @@ export const getUserIngredients = asyncHandler(
           },
         },
       ],
-    })) as any;
+    });
 
     if (ingredients) {
       const ingredientArray = ingredients.Ingredients;
@@ -108,10 +108,9 @@ export const getIngredients = asyncHandler(
   }
 );
 
-export const deleteUserIngredient = asyncHandler(
-  async (req: Request, res: Response) => {
-    param('ingredientId').isInt().withMessage('User ID must be an integer');
-
+export const deleteUserIngredient = [
+  param('ingredientId').isInt().withMessage('Ingredient ID must be an integer'),
+  asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ err: errors.array() });
@@ -135,15 +134,15 @@ export const deleteUserIngredient = asyncHandler(
     } catch (error) {
       res.status(500).json({ err: 'Error removing ingredient from user' });
     }
-  }
-);
+  }),
+];
 
-export const deleteManyUserIngredient = asyncHandler(
-  async (req: Request, res: Response) => {
-    body('ingredientIds')
-      .isArray({ min: 1 })
-      .withMessage("Expected list of user ID's");
+export const deleteManyUserIngredient = [
+  body('ingredientIds')
+    .isArray({ min: 1 })
+    .withMessage("Expected list of user ID's"),
 
+  asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ err: errors.array() });
@@ -167,11 +166,11 @@ export const deleteManyUserIngredient = asyncHandler(
     } catch (error) {
       res.status(500).json({ err: 'Error removing ingredients from user' });
     }
-  }
-);
+  }),
+];
 
 const getUserIngredientInstanceByName = async (uid: string, name: string) => {
-  const userIngredient = Ingredient.findOne({
+  const userIngredient = await Ingredient.findOne({
     where: { name: name },
     include: [
       {
@@ -183,12 +182,11 @@ const getUserIngredientInstanceByName = async (uid: string, name: string) => {
       },
     ],
   });
-
   return userIngredient;
 };
 
 const createGlobalIngredient = async (req: Request) => {
-  const createdGlobalIngredient = Ingredient.create({
+  const createdGlobalIngredient = await Ingredient.create({
     name: req.body.name,
   });
 
@@ -196,15 +194,13 @@ const createGlobalIngredient = async (req: Request) => {
 };
 
 const getUserInstance = async (userId: string) => {
-  const userInstance = Users.findByPk(userId);
-
+  const userInstance = await Users.findByPk(userId);
   return userInstance;
 };
 
 const getGlobalIngredientInstance = async (req: Request) => {
-  const globalIngredientInstance = Ingredient.findOne({
+  const globalIngredientInstance = await Ingredient.findOne({
     where: { name: req.body.name },
   });
-
   return globalIngredientInstance;
 };
