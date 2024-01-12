@@ -38,7 +38,7 @@ export const createUserIngredient = [
 
       if (!globalIngredientInstance) {
         // Add the ingredient to global table
-        globalIngredientInstance = await createGlobalIngredient(req);
+        globalIngredientInstance = await createGlobalIngredient(req.body.name);
 
         if (!globalIngredientInstance) {
           res.status(400).json({ err: 'Error creating global ingredient.' });
@@ -185,9 +185,9 @@ const getUserIngredientInstanceByName = async (uid: string, name: string) => {
   return userIngredient;
 };
 
-const createGlobalIngredient = async (req: Request) => {
+const createGlobalIngredient = async (name: string) => {
   const createdGlobalIngredient = await Ingredient.create({
-    name: req.body.name,
+    name: name,
   });
 
   return createdGlobalIngredient;
