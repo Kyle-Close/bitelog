@@ -204,3 +204,31 @@ const getGlobalIngredientInstance = async (req: Request) => {
   });
   return globalIngredientInstance;
 };
+
+export const verifyIngredientIdsInUserTable = async (
+  userIngredientIds: number[],
+  inputIngredientIds: number[]
+) => {
+  return inputIngredientIds.every((id) => userIngredientIds.includes(id));
+};
+
+export const getUserIngredientIdList = async (userId: string) => {
+  // Returns an array of ALL ingredient id's in users' ingredient table
+  const userWithIngredientsObj: any = await Users.findByPk(userId, {
+    include: [
+      {
+        model: Ingredient,
+        attributes: ['id'], // Only fetch the ingredient IDs
+        through: {
+          attributes: [], // No need to fetch attributes from the join table
+        },
+      },
+    ],
+  });
+
+  const ingredientIds: number[] = userWithIngredientsObj.Ingredients.map(
+    (data: any) => data.dataValues.id
+  );
+
+  return ingredientIds;
+};
