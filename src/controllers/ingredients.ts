@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import Users from '../models/user';
-import Ingredient from '../models/ingredient';
+import Ingredient from '../models/ingredients';
 import UserIngredients from '../models/joins/UserIngredients';
 
 export const createUserIngredient = [
@@ -46,31 +46,23 @@ export const createUserIngredient = [
         }
       }
 
-      // Use the ingredient to add to user table
-      const userInstance: any = await getUserInstance(res.locals.uid);
       // res.locals.userInstance
-      console.log(
-        '------------------------------------------------------------------------------------------------------'
-      );
-      const createUserIngredient = await UserIngredients.create({
-        UserId: '8HY8LpUiAbc4wlR0ocp6PTA9s732',
-        IngredientId: 40,
+      const userIngredientInstance = await UserIngredients.create({
+        UserId: res.locals.uid,
+        IngredientId: globalIngredientInstance.dataValues.id,
       });
-      const createdIngredient = await userInstance.addIngredient(
-        globalIngredientInstance
-      );
 
-      if (!createdIngredient) {
+      if (!userIngredientInstance) {
         res.status(400).json({ msg: 'Error creating user ingredient.' });
         return;
       }
 
       res.status(201).json({ msg: 'Successfully created user ingredient.' });
+      return;
     } catch (error) {
-      // Handle errors here
-      res.status(500).json({ err: 'An error occurred.' });
+      res.status(500).json({ err: error });
+      return;
     }
-    return;
   }),
 ];
 

@@ -1,17 +1,17 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../db';
 
-const Ingredient = sequelize.define(
-  'Ingredient',
+const Ingredients = sequelize.define(
+  'Ingredients',
   {
     name: {
       type: DataTypes.STRING,
     },
   },
   {
-    tableName: 'Ingredient',
+    tableName: 'Ingredients',
     timestamps: false,
   }
 );
 
-export default Ingredient;
+export default Ingredients;

@@ -1,4 +1,4 @@
-import Ingredient from './ingredient';
+import Ingredient from './ingredients';
 import Journal from './journal';
 import Users from './user';
 import EatFoodLogs from './eat_food_log';
@@ -37,9 +37,11 @@ const associations = () => {
   // User_Ingredients
   Users.belongsToMany(Ingredient, {
     through: UserIngredients,
+    timestamps: false,
   });
   Ingredient.belongsToMany(Users, {
     through: UserIngredients,
+    timestamps: false,
   });
 
   sequelize.sync();
