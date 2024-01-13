@@ -6,6 +6,8 @@ import {
   verifyIngredientIdsInUserTable,
 } from './ingredients';
 import Users from '../models/user';
+import FoodIngredients from '../models/joins/FoodIngredients';
+import UserFoods from '../models/user_food';
 
 export const createUserFood = [
   body('name')
@@ -41,29 +43,45 @@ export const createUserFood = [
       return;
     }
 
+    // Insert single UserFood entry. Using userID and name.
+    const userFoodsInstance = await UserFoods.create({
+      name: req.body.name,
+      UserId: res.locals.uid,
+    });
+
     // Create array of food objects to insert into user_foods table
-    const foodObjects = createFoodObjectsForInsertion(
-      req.body.name,
-      userIngredientIds
+    const foodObjects = createFoodIngredientsObjectsForInsertion(
+      req.body.ingredientIds,
+      userFoodsInstance.dataValues.id
     );
 
-    // Create food - all checks complete
-    const foods = await createFoods(userIngredientIds);
+    // Insert all ingredients into FoodIngredients.
+    const foodIngredients = await createBulkFoodIngredients(foodObjects);
+
+    // Check the length of the retured array and send response
+
+    // TODO: Add a check near the start to see if food has already been created. Check the name
+    // TODO: Make the above a transaction.
+    // TODO: IF a food is deleted. Need to first delete all the entries in FoodIngredients table
 
     return;
   }),
 ];
 
-const createFoodObjectsForInsertion = (
-  name: string,
-  ingredientIdList: number[]
+const createFoodIngredientsObjectsForInsertion = (
+  ingredientIdList: number[],
+  foodId: number
 ) => {
-  return ingredientIdList.map((id) => {
-    const obj = { name };
-  });
+  return ingredientIdList.map((id) => ({
+    UserFoodId: foodId,
+    IngredientId: id,
+  }));
 };
 
-const createFoods = async (ingredientIds: number[]) => {
-  //
-  Users.bulkCreate([{}, {}]);
+const createBulkFoodIngredients = async (foodIngredientsObjects: {}[]) => {
+  try {
+    return await FoodIngredients.bulkCreate(foodIngredientsObjects);
+  } catch (err) {
+    console.log(err);
+  }
 };
