@@ -24,6 +24,16 @@ export const createUserFood = [
       return;
     }
 
+    // Check if food name already exists in user table
+    const foodExists = await getUserFoodByName(req.body.name);
+
+    if (foodExists) {
+      res
+        .status(400)
+        .json({ err: `Food '${req.body.name}' already exists in table` });
+      return;
+    }
+
     const userIngredientIds = await getUserIngredientIdList(res.locals.uid);
 
     if (!userIngredientIds || userIngredientIds.length === 0) {
@@ -59,11 +69,13 @@ export const createUserFood = [
     const foodIngredients = await createBulkFoodIngredients(foodObjects);
 
     // Check the length of the retured array and send response
-
-    // TODO: Add a check near the start to see if food has already been created. Check the name
+    if (!foodIngredients || foodIngredients.length === 0) {
+      res.status(400).json({ err: 'Error creating bulk food ingredients.' });
+      return;
+    }
     // TODO: Make the above a transaction.
     // TODO: IF a food is deleted. Need to first delete all the entries in FoodIngredients table
-
+    res.status(200).json({ msg: 'Food successfully created.' });
     return;
   }),
 ];
@@ -84,4 +96,10 @@ const createBulkFoodIngredients = async (foodIngredientsObjects: {}[]) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+const getUserFoodByName = async (name: string) => {
+  return await UserFoods.findOne({
+    where: { name },
+  });
 };
