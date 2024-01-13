@@ -1,14 +1,17 @@
 import { body, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
-import Users from '../models/user';
-import Ingredient from '../models/ingredient';
 import {
   getUserIngredientIdList,
   verifyIngredientIdsInUserTable,
 } from './ingredients';
+import Users from '../models/user';
 
 export const createUserFood = [
+  body('name')
+    .isString()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Food name must be between 1 & 100 characters.'),
   body('ingredientIds').isArray().isLength({ min: 1 }),
   body('ingredientIds.*').isInt(),
 
@@ -38,6 +41,29 @@ export const createUserFood = [
       return;
     }
 
+    // Create array of food objects to insert into user_foods table
+    const foodObjects = createFoodObjectsForInsertion(
+      req.body.name,
+      userIngredientIds
+    );
+
+    // Create food - all checks complete
+    const foods = await createFoods(userIngredientIds);
+
     return;
   }),
 ];
+
+const createFoodObjectsForInsertion = (
+  name: string,
+  ingredientIdList: number[]
+) => {
+  return ingredientIdList.map((id) => {
+    const obj = { name };
+  });
+};
+
+const createFoods = async (ingredientIds: number[]) => {
+  //
+  Users.bulkCreate([{}, {}]);
+};
