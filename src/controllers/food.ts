@@ -8,6 +8,7 @@ import {
 import Users from '../models/user';
 import FoodIngredients from '../models/joins/FoodIngredients';
 import UserFoods from '../models/user_food';
+import { sequelize } from '../db';
 
 export const createUserFood = [
   body('name')
@@ -53,27 +54,41 @@ export const createUserFood = [
       return;
     }
 
-    // Insert single UserFood entry. Using userID and name.
-    const userFoodsInstance = await UserFoods.create({
-      name: req.body.name,
-      UserId: res.locals.uid,
-    });
+    // --- Start transaction ---
+    const transaction = await sequelize.transaction();
 
-    // Create array of food objects to insert into user_foods table
-    const foodObjects = createFoodIngredientsObjectsForInsertion(
-      req.body.ingredientIds,
-      userFoodsInstance.dataValues.id
-    );
+    try {
+      // Insert single UserFood entry. Using userID and name.
+      const userFoodsInstance = await UserFoods.create({
+        name: req.body.name,
+        UserId: res.locals.uid,
+      });
 
-    // Insert all ingredients into FoodIngredients.
-    const foodIngredients = await createBulkFoodIngredients(foodObjects);
+      // Create array of food objects to insert into user_foods table
+      const foodObjects = createFoodIngredientsObjectsForInsertion(
+        req.body.ingredientIds,
+        userFoodsInstance.dataValues.id
+      );
 
-    // Check the length of the retured array and send response
-    if (!foodIngredients || foodIngredients.length === 0) {
-      res.status(400).json({ err: 'Error creating bulk food ingredients.' });
+      // Insert all ingredients into FoodIngredients.
+      const foodIngredients = await createBulkFoodIngredients(foodObjects);
+
+      // Check the length of the retured array and send response
+      if (!foodIngredients || foodIngredients.length === 0) {
+        res.status(400).json({ err: 'Error creating bulk food ingredients.' });
+        return;
+      }
+      // --- Execute Transaction ---
+      await transaction.commit();
+    } catch (err) {
+      // --- Rollback Transaction ---
+      await transaction.rollback();
+
+      console.log(console.log(err));
+      res.status(400).json({ err });
       return;
     }
-    // TODO: Make the above a transaction.
+
     // TODO: IF a food is deleted. Need to first delete all the entries in FoodIngredients table
     res.status(200).json({ msg: 'Food successfully created.' });
     return;
