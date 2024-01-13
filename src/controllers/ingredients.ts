@@ -3,6 +3,7 @@ import { body, param, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import Users from '../models/user';
 import Ingredient from '../models/ingredient';
+import UserIngredients from '../models/joins/UserIngredients';
 
 export const createUserIngredient = [
   body('name')
@@ -46,7 +47,15 @@ export const createUserIngredient = [
       }
 
       // Use the ingredient to add to user table
-      const userInstance: any = await getUserInstance(res.locals.uid); // res.locals.userInstance
+      const userInstance: any = await getUserInstance(res.locals.uid);
+      // res.locals.userInstance
+      console.log(
+        '------------------------------------------------------------------------------------------------------'
+      );
+      const createUserIngredient = await UserIngredients.create({
+        UserId: '8HY8LpUiAbc4wlR0ocp6PTA9s732',
+        IngredientId: 40,
+      });
       const createdIngredient = await userInstance.addIngredient(
         globalIngredientInstance
       );

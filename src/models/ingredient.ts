@@ -9,7 +9,7 @@ const Ingredient = sequelize.define(
     },
   },
   {
-    tableName: 'Ingredients',
+    tableName: 'Ingredient',
     timestamps: false,
   }
 );

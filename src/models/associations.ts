@@ -6,6 +6,7 @@ import Measurement from './measurement';
 import ReportLogs from './report_log';
 import { sequelize } from '../db';
 import UserFoods from './user_food';
+import UserIngredients from './joins/UserIngredients';
 
 const associations = () => {
   // Journal
@@ -35,12 +36,10 @@ const associations = () => {
 
   // User_Ingredients
   Users.belongsToMany(Ingredient, {
-    through: 'UserIngredients',
-    timestamps: false,
+    through: UserIngredients,
   });
   Ingredient.belongsToMany(Users, {
-    through: 'UserIngredients',
-    timestamps: false,
+    through: UserIngredients,
   });
 
   sequelize.sync();

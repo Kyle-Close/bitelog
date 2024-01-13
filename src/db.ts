@@ -5,7 +5,8 @@ const dbName = process.env.DB_DATABASE ? process.env.DB_DATABASE : '';
 const pass = process.env.DB_PASS ? process.env.DB_PASS : '';
 
 export const sequelize = new Sequelize(dbName, user, pass, {
-  logging: false,
+  logging: customLogger,
+  logQueryParameters: true,
   host: process.env.DB_HOST,
   port: 5432,
   dialect: 'postgres',
@@ -15,3 +16,8 @@ export const sequelize = new Sequelize(dbName, user, pass, {
     },
   },
 });
+
+function customLogger(queryString: string, queryObject: any) {
+  console.log(queryString); // outputs a string
+  console.log(queryObject.bind); // outputs an array
+}
