@@ -5,7 +5,7 @@ const dbName = process.env.DB_DATABASE ? process.env.DB_DATABASE : '';
 const pass = process.env.DB_PASS ? process.env.DB_PASS : '';
 
 export const sequelize = new Sequelize(dbName, user, pass, {
-  logging: customLogger,
+  logging: false, //customLogger,
   logQueryParameters: true,
   host: process.env.DB_HOST,
   port: 5432,
