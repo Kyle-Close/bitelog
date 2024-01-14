@@ -5,7 +5,7 @@ import UserFoods from '../../models/user_food';
 import { sequelize } from '../../db';
 import {
   getUserFoodByName,
-  createBulkFoodIngredients,
+  insertManyFoodIngredients,
   createFoodIngredientsObjectsForInsertion,
   getIngredientListByFoodId,
   getIngredientsToRemoveList,
@@ -81,7 +81,7 @@ export const createUserFood = [
       );
 
       // Insert all ingredients into FoodIngredients.
-      const foodIngredients = await createBulkFoodIngredients(
+      const foodIngredients = await insertManyFoodIngredients(
         foodObjects,
         transaction
       );
@@ -217,7 +217,15 @@ export const updateUserFood = [
         ingredientIdsInFoodList,
         req.body.ingredientIds
       );
+
+      // Create objects to be used for FoodIngredients insert
+      const foodIngredientObjList = createFoodIngredientsObjectsForInsertion(
+        ingredientIdsToAddList,
+        Number(req.params.foodId)
+      );
+
       // Insert entries of new foodIngredients that did not previously exist
+      await insertManyFoodIngredients(foodIngredientObjList);
 
       // --- Execute Transaction ---
       await transaction.commit();

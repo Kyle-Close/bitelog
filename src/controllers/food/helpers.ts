@@ -12,14 +12,18 @@ export const createFoodIngredientsObjectsForInsertion = (
   }));
 };
 
-export const createBulkFoodIngredients = async (
+export const insertManyFoodIngredients = async (
   foodIngredientsObjects: {}[],
-  transaction: Transaction
+  transaction?: Transaction
 ) => {
   try {
-    return await FoodIngredients.bulkCreate(foodIngredientsObjects, {
-      transaction,
-    });
+    if (transaction) {
+      return await FoodIngredients.bulkCreate(foodIngredientsObjects, {
+        transaction,
+      });
+    } else {
+      return await FoodIngredients.bulkCreate(foodIngredientsObjects);
+    }
   } catch (err) {
     console.log(err);
     throw err;
