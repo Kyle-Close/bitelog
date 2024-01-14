@@ -9,6 +9,7 @@ import Users from '../models/user';
 import FoodIngredients from '../models/joins/FoodIngredients';
 import UserFoods from '../models/user_food';
 import { sequelize } from '../db';
+import { Transaction } from 'sequelize';
 
 export const createUserFood = [
   body('name')
@@ -59,10 +60,13 @@ export const createUserFood = [
 
     try {
       // Insert single UserFood entry. Using userID and name.
-      const userFoodsInstance = await UserFoods.create({
-        name: req.body.name,
-        UserId: res.locals.uid,
-      });
+      const userFoodsInstance = await UserFoods.create(
+        {
+          name: req.body.name,
+          UserId: res.locals.uid,
+        },
+        { transaction }
+      );
 
       // Create array of food objects to insert into user_foods table
       const foodObjects = createFoodIngredientsObjectsForInsertion(
@@ -71,7 +75,10 @@ export const createUserFood = [
       );
 
       // Insert all ingredients into FoodIngredients.
-      const foodIngredients = await createBulkFoodIngredients(foodObjects);
+      const foodIngredients = await createBulkFoodIngredients(
+        foodObjects,
+        transaction
+      );
 
       // Check the length of the retured array and send response
       if (!foodIngredients || foodIngredients.length === 0) {
@@ -84,7 +91,7 @@ export const createUserFood = [
       // --- Rollback Transaction ---
       await transaction.rollback();
 
-      console.log(console.log(err));
+      console.log(console.log(`Rolled back transaction: ${err}`));
       res.status(400).json({ err });
       return;
     }
@@ -105,11 +112,17 @@ const createFoodIngredientsObjectsForInsertion = (
   }));
 };
 
-const createBulkFoodIngredients = async (foodIngredientsObjects: {}[]) => {
+const createBulkFoodIngredients = async (
+  foodIngredientsObjects: {}[],
+  transaction: Transaction
+) => {
   try {
-    return await FoodIngredients.bulkCreate(foodIngredientsObjects);
+    return await FoodIngredients.bulkCreate(foodIngredientsObjects, {
+      transaction,
+    });
   } catch (err) {
     console.log(err);
+    throw err;
   }
 };
 
