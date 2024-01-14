@@ -1,15 +1,17 @@
 import { body, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
+import UserFoods from '../../models/user_food';
+import { sequelize } from '../../db';
+import {
+  getUserFoodByName,
+  createBulkFoodIngredients,
+  createFoodIngredientsObjectsForInsertion,
+} from './helpers';
 import {
   getUserIngredientIdList,
   verifyIngredientIdsInUserTable,
-} from './ingredients';
-import Users from '../models/user';
-import FoodIngredients from '../models/joins/FoodIngredients';
-import UserFoods from '../models/user_food';
-import { sequelize } from '../db';
-import { Transaction } from 'sequelize';
+} from '../ingredients/helpers';
 
 export const createUserFood = [
   body('name')
@@ -101,33 +103,3 @@ export const createUserFood = [
     return;
   }),
 ];
-
-const createFoodIngredientsObjectsForInsertion = (
-  ingredientIdList: number[],
-  foodId: number
-) => {
-  return ingredientIdList.map((id) => ({
-    UserFoodId: foodId,
-    IngredientId: id,
-  }));
-};
-
-const createBulkFoodIngredients = async (
-  foodIngredientsObjects: {}[],
-  transaction: Transaction
-) => {
-  try {
-    return await FoodIngredients.bulkCreate(foodIngredientsObjects, {
-      transaction,
-    });
-  } catch (err) {
-    console.log(err);
-    throw err;
-  }
-};
-
-const getUserFoodByName = async (name: string) => {
-  return await UserFoods.findOne({
-    where: { name },
-  });
-};

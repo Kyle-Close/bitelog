@@ -1,9 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
-import Users from '../models/user';
-import Ingredient from '../models/ingredients';
-import UserIngredients from '../models/joins/UserIngredients';
+import Users from '../../models/user';
+import Ingredient from '../../models/ingredients';
+import UserIngredients from '../../models/joins/UserIngredients';
+import {
+  getUserIngredientInstanceByName,
+  getGlobalIngredientInstanceByName,
+  createGlobalIngredient,
+} from './helpers';
 
 export const createUserIngredient = [
   body('name')
@@ -35,7 +40,9 @@ export const createUserIngredient = [
       }
 
       // Check if ingredient exists in global table
-      let globalIngredientInstance = await getGlobalIngredientInstance(req);
+      let globalIngredientInstance = await getGlobalIngredientInstanceByName(
+        req.body.name
+      );
 
       if (!globalIngredientInstance) {
         // Add the ingredient to global table
@@ -169,67 +176,3 @@ export const deleteManyUserIngredient = [
     }
   }),
 ];
-
-const getUserIngredientInstanceByName = async (uid: string, name: string) => {
-  const userIngredient = await Ingredient.findOne({
-    where: { name: name },
-    include: [
-      {
-        model: Users,
-        where: { id: uid },
-        through: {
-          attributes: [],
-        },
-      },
-    ],
-  });
-  return userIngredient;
-};
-
-const createGlobalIngredient = async (name: string) => {
-  const createdGlobalIngredient = await Ingredient.create({
-    name: name,
-  });
-
-  return createdGlobalIngredient;
-};
-
-const getUserInstance = async (userId: string) => {
-  const userInstance = await Users.findByPk(userId);
-  return userInstance;
-};
-
-const getGlobalIngredientInstance = async (req: Request) => {
-  const globalIngredientInstance = await Ingredient.findOne({
-    where: { name: req.body.name },
-  });
-  return globalIngredientInstance;
-};
-
-export const verifyIngredientIdsInUserTable = async (
-  userIngredientIds: number[],
-  inputIngredientIds: number[]
-) => {
-  return inputIngredientIds.every((id) => userIngredientIds.includes(id));
-};
-
-export const getUserIngredientIdList = async (userId: string) => {
-  // Returns an array of ALL ingredient id's in users' ingredient table
-  const userWithIngredientsObj: any = await Users.findByPk(userId, {
-    include: [
-      {
-        model: Ingredient,
-        attributes: ['id'], // Only fetch the ingredient IDs
-        through: {
-          attributes: [], // No need to fetch attributes from the join table
-        },
-      },
-    ],
-  });
-
-  const ingredientIds: number[] = userWithIngredientsObj.Ingredients.map(
-    (data: any) => data.dataValues.id
-  );
-
-  return ingredientIds;
-};
