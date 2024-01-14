@@ -31,3 +31,53 @@ export const getUserFoodByName = async (name: string) => {
     where: { name },
   });
 };
+
+export const getIngredientsToRemoveList = (
+  userIngredients: number[],
+  updatedIngredients: number[]
+) => {
+  return userIngredients.filter((id) => !updatedIngredients.includes(id));
+};
+
+export const getIngredientListByFoodId = async (foodId: number) => {
+  try {
+    const ingredientInstances = await FoodIngredients.findAll({
+      where: { UserFoodId: foodId },
+    });
+
+    return ingredientInstances.map(
+      (instance) => instance.dataValues.IngredientId
+    );
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const removeManyFoodIngredients = async (
+  foodId: number,
+  ingredientIdList: number[],
+  transaction?: Transaction
+) => {
+  try {
+    if (transaction) {
+      await FoodIngredients.destroy({
+        where: { UserFoodId: foodId, IngredientId: ingredientIdList },
+        transaction,
+      });
+    } else {
+      await FoodIngredients.destroy({
+        where: { UserFoodId: foodId, IngredientId: ingredientIdList },
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+export const getIngredientsToAddList = (
+  userIngredients: number[],
+  updatedIngredients: number[]
+) => {
+  return updatedIngredients.filter((id) => !userIngredients.includes(id));
+};
