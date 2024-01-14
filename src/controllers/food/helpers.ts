@@ -85,3 +85,14 @@ export const getIngredientsToAddList = (
 ) => {
   return updatedIngredients.filter((id) => !userIngredients.includes(id));
 };
+
+export const removeUserFood = async (
+  foodId: number,
+  transaction?: Transaction
+) => {
+  try {
+    return await UserFoods.destroy({ where: { id: foodId }, transaction });
+  } catch (err) {
+    throw err;
+  }
+};

@@ -3,6 +3,7 @@ import { isAuthenticated } from '../auth/authenticate';
 import { isAuthorized } from '../auth/authorized';
 import {
   createUserFood,
+  deleteUserFood,
   getUserFoodList,
   updateUserFood,
 } from '../controllers/food';
@@ -10,24 +11,31 @@ import {
 const foodRouter = express.Router();
 
 foodRouter.post(
-  '/user/:userId/foods',
+  '/user/:userId/food',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   createUserFood
 );
 
 foodRouter.get(
-  '/user/:userId/foods',
+  '/user/:userId/food',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserFoodList
 );
 
 foodRouter.put(
-  '/user/:userId/foods/:foodId',
+  '/user/:userId/food/:foodId',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   updateUserFood
+);
+
+foodRouter.delete(
+  '/user/:userId/food/:foodId',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  deleteUserFood
 );
 
 export { foodRouter };

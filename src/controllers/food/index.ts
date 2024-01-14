@@ -11,11 +11,13 @@ import {
   getIngredientsToRemoveList,
   removeManyFoodIngredients,
   getIngredientsToAddList,
+  removeUserFood,
 } from './helpers';
 import {
   getUserIngredientIdList,
   verifyIngredientIdsInUserTable,
 } from '../ingredients/helpers';
+import { Transaction } from 'sequelize';
 
 export const createUserFood = [
   body('name')
@@ -102,7 +104,6 @@ export const createUserFood = [
       return;
     }
 
-    // TODO: IF a food is deleted. Need to first delete all the entries in FoodIngredients table
     res.status(200).json({ msg: 'Food successfully created.' });
     return;
   }),
@@ -188,16 +189,13 @@ export const updateUserFood = [
         res.status(400).json({ err: 'Error updating user food.' });
         return;
       }
-      // Updating to [3, 6]
 
       // Get a list of ingredient ids for the specified food (before update)
-      // [3, 4, 5]
       const ingredientIdsInFoodList = await getIngredientListByFoodId(
         Number(req.params.foodId)
       );
 
       // Get a list of ingredient ids that will no longer be associated with this food
-      // [4, 5]
       const ingredientIdsToRemoveList = getIngredientsToRemoveList(
         ingredientIdsInFoodList,
         req.body.ingredientIds
@@ -243,4 +241,32 @@ export const updateUserFood = [
   }),
 ];
 
+export const deleteUserFood = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Check if the user food exists
+    const foodExists = await UserFoods.findByPk(req.params.foodId);
+
+    if (!foodExists) {
+      res.status(400).json({
+        err: `Cannot delete. Food does not exist in user food table`,
+      });
+      return;
+    }
+
+    try {
+      // Delete the UserFood entry
+      await removeUserFood(Number(req.params.foodId));
+
+      res.status(200).json({ msg: 'Successfully deleted user food.' });
+      return;
+    } catch (err) {
+      console.log(err);
+
+      res.status(400).json({ err: 'Error deleting user food.' });
+      return;
+    }
+  }
+);
+
 // TODO: Document each endpoint. Expects in body, returns ?
+// TODO: Make endpoint to get all ingredients for specific food
