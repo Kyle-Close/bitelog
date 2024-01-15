@@ -48,7 +48,7 @@ const associations = () => {
     timestamps: false,
   });
 
-  sequelize.sync({ force: true });
+  sequelize.sync();
 };
 
 export default associations;
