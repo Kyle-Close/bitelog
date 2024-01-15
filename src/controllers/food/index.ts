@@ -25,12 +25,18 @@ import {
 export const getUserFoodList = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const foodList = await UserFoods.findAll({
+      const foodInstances = await UserFoods.findAll({
         where: { UserId: res.locals.uid },
       });
-      res
-        .status(200)
-        .json({ msg: 'Successfully retrieved user food list.', foodList });
+
+      const foodDataValues = await foodInstances.map(
+        (instance) => instance.dataValues
+      );
+
+      res.status(200).json({
+        msg: 'Successfully retrieved user food list.',
+        foodDataValues,
+      });
       return;
     } catch (err) {
       console.log(err);
@@ -155,6 +161,12 @@ export const createUserFood = [
       }
       // --- Execute Transaction ---
       await transaction.commit();
+
+      res.status(200).json({
+        msg: 'Food successfully created.',
+        foodDataValues: userFoodsInstance.dataValues,
+      });
+      return;
     } catch (err) {
       // --- Rollback Transaction ---
       await transaction.rollback();
@@ -163,9 +175,6 @@ export const createUserFood = [
       res.status(400).json({ err });
       return;
     }
-
-    res.status(200).json({ msg: 'Food successfully created.' });
-    return;
   }),
 ];
 
@@ -227,6 +236,7 @@ export const updateUserFood = [
         },
         {
           transaction,
+          returning: true,
           where: { UserId: res.locals.uid, id: Number(req.params.foodId) },
         }
       );
@@ -274,7 +284,10 @@ export const updateUserFood = [
       // --- Execute Transaction ---
       await transaction.commit();
 
-      res.status(200).json({ msg: 'Successfully updated user food.' });
+      res.status(200).json({
+        msg: 'Successfully updated user food.',
+        foodDataValue: userFoodsInstance[1][0].dataValues,
+      });
       return;
     } catch (err) {
       // --- Rollback Transaction ---
@@ -314,5 +327,3 @@ export const deleteUserFood = asyncHandler(
     }
   }
 );
-
-// TODO: Document each endpoint. Expects in body, returns ?
