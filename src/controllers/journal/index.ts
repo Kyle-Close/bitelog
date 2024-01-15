@@ -13,6 +13,12 @@ export const getUserJournal = asyncHandler(
       }
 
       res.locals.journal = journal.dataValues;
+
+      if (res.locals.journal.id !== Number(req.params.journalId)) {
+        res.status(400).json({ err: 'Journal IDs do not match.' });
+        return;
+      }
+
       next();
     } catch (err) {
       res.status(400).json({ err });

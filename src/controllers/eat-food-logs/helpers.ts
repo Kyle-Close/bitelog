@@ -1,6 +1,7 @@
 import { Transaction } from 'sequelize';
 import EatLogUserFoods from '../../models/joins/EatLogUserFoods';
 import UserFoods from '../../models/user_food';
+import EatLogs from '../../models/eat_logs';
 
 type EatLogUserFoodObject = {
   EatLogId: number;
@@ -47,4 +48,17 @@ export const createEatLogUserFoodsObjects = async (
     UserFoodId: food.id,
     quantity: food.quantity,
   }));
+};
+
+export const getJournalEatLogInstanceById = async (
+  logId: number,
+  journalId: number
+) => {
+  try {
+    return await EatLogs.findOne({
+      where: { id: logId, JournalId: journalId },
+    });
+  } catch (err) {
+    throw err;
+  }
 };
