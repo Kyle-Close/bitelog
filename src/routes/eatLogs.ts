@@ -1,5 +1,9 @@
 import express from 'express';
-import { createEatFoodEntry, getEatLog } from '../controllers/eat-food-logs';
+import {
+  createEatLogEntry,
+  getEatLog,
+  getUserEatLogs,
+} from '../controllers/eat-food-logs';
 import { isAuthenticated } from '../auth/authenticate';
 import { isAuthorized } from '../auth/authorized';
 import { getUserJournal } from '../controllers/journal';
@@ -14,12 +18,20 @@ eatLogRouter.get(
   getEatLog
 );
 
+eatLogRouter.get(
+  '/user/:userId/journal/:journalId/eat_logs',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getUserJournal,
+  getUserEatLogs
+);
+
 eatLogRouter.post(
   '/user/:userId/journal/:journalId/eat_logs',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserJournal,
-  createEatFoodEntry
+  createEatLogEntry
 );
 
 export { eatLogRouter };

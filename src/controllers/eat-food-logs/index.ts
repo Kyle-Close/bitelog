@@ -8,6 +8,7 @@ import {
   getFoodIdList,
   verifyUserFoodExist,
   getJournalEatLogInstanceById,
+  getAllEatLogInstancesByJournalId,
 } from './helpers';
 import { sequelize } from '../../db';
 
@@ -42,10 +43,32 @@ export const getEatLog = asyncHandler(
   }
 );
 
-// TODO: Returns a list of ALL EatFood entries given the user ID
+// Returns a list of ALL EatFood entries given the user ID
+export const getUserEatLogs = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const journalId = res.locals.journal.id;
+
+    try {
+      const eatLogInstances = await getAllEatLogInstancesByJournalId(journalId);
+      const eatLogDataValues = eatLogInstances.map(
+        (instance) => instance.dataValues
+      );
+
+      res.status(200).json({
+        msg: 'Successfully retrieved eat logs for specified journal',
+        eatLogDataValues,
+      });
+
+      return;
+    } catch (err) {
+      res.status(400).json({ err });
+      return;
+    }
+  }
+);
 
 // Creates a EatFood entry given a journal ID, food ID list, and notes (optional)
-export const createEatFoodEntry = [
+export const createEatLogEntry = [
   param('journalId').isNumeric(),
   body('notes').isString(),
   body('foods').isArray().isLength({ min: 1 }),
@@ -112,3 +135,5 @@ export const createEatFoodEntry = [
     }
   }),
 ];
+
+// Updates a EatFood entry given log ID, journal ID, food ID list, and notes (optional)

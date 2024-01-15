@@ -62,3 +62,11 @@ export const getJournalEatLogInstanceById = async (
     throw err;
   }
 };
+
+export const getAllEatLogInstancesByJournalId = async (journalId: number) => {
+  try {
+    return await EatLogs.findAll({ where: { JournalId: journalId } });
+  } catch (err) {
+    throw err;
+  }
+};
