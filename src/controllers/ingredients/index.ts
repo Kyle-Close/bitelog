@@ -10,6 +10,49 @@ import {
   createGlobalIngredient,
 } from './helpers';
 
+export const getIngredients = asyncHandler(
+  async (req: Request, res: Response) => {
+    const ingredients = await Ingredient.findAll();
+    if (ingredients) {
+      res.status(200).json({
+        msg: 'Successfully retrieved list of ingredients',
+        ingredients,
+      });
+      return;
+    } else {
+      res.status(400).json({ err: 'Could not retrieve list of ingredients' });
+      return;
+    }
+  }
+);
+
+export const getUserIngredients = asyncHandler(
+  async (req: Request, res: Response) => {
+    const ingredients: any = await Users.findByPk(res.locals.uid, {
+      include: [
+        {
+          model: Ingredient,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    });
+
+    if (ingredients) {
+      const ingredientArray = ingredients.Ingredients;
+      res.status(200).json({
+        msg: 'Successfully retrieved user ingredients.',
+        ingredients: ingredientArray,
+      });
+      return;
+    } else {
+      res.status(400).json({ err: 'Could not retrieve user ingredients.' });
+      return;
+    }
+  }
+);
+
 export const createUserIngredient = [
   body('name')
     .isString()
@@ -64,7 +107,10 @@ export const createUserIngredient = [
         return;
       }
 
-      res.status(201).json({ msg: 'Successfully created user ingredient.' });
+      res.status(201).json({
+        msg: 'Successfully created user ingredient.',
+        ingredientDataValues: userIngredientInstance.dataValues,
+      });
       return;
     } catch (error) {
       res.status(500).json({ err: error });
@@ -72,49 +118,6 @@ export const createUserIngredient = [
     }
   }),
 ];
-
-export const getUserIngredients = asyncHandler(
-  async (req: Request, res: Response) => {
-    const ingredients: any = await Users.findByPk(res.locals.uid, {
-      include: [
-        {
-          model: Ingredient,
-          through: {
-            attributes: [],
-          },
-        },
-      ],
-    });
-
-    if (ingredients) {
-      const ingredientArray = ingredients.Ingredients;
-      res.status(200).json({
-        msg: 'Successfully retrieved user ingredients.',
-        ingredients: ingredientArray,
-      });
-      return;
-    } else {
-      res.status(400).json({ err: 'Could not retrieve user ingredients.' });
-      return;
-    }
-  }
-);
-
-export const getIngredients = asyncHandler(
-  async (req: Request, res: Response) => {
-    const ingredients = await Ingredient.findAll();
-    if (ingredients) {
-      res.status(200).json({
-        msg: 'Successfully retrieved list of ingredients',
-        ingredients,
-      });
-      return;
-    } else {
-      res.status(400).json({ err: 'Could not retrieve list of ingredients' });
-      return;
-    }
-  }
-);
 
 export const deleteUserIngredient = [
   param('ingredientId').isInt().withMessage('Ingredient ID must be an integer'),
