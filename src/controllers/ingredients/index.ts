@@ -80,19 +80,19 @@ export const createUserIngredient = [
 
       if (userIngredient) {
         res.status(400).json({
-          err: `${req.body.name} already exists in user ingredient table`,
+          err: `${ingredientName} already exists in user ingredient table`,
         });
         return;
       }
 
       // Check if ingredient exists in global table
       let globalIngredientInstance = await getGlobalIngredientInstanceByName(
-        req.body.name
+        ingredientName
       );
 
       if (!globalIngredientInstance) {
         // Add the ingredient to global table
-        globalIngredientInstance = await createGlobalIngredient(req.body.name);
+        globalIngredientInstance = await createGlobalIngredient(ingredientName);
 
         if (!globalIngredientInstance) {
           res.status(400).json({ err: 'Error creating global ingredient.' });
@@ -101,7 +101,7 @@ export const createUserIngredient = [
 
       // res.locals.userInstance
       const userIngredientInstance = await UserIngredients.create({
-        UserId: res.locals.uid,
+        UserId: userId,
         IngredientId: globalIngredientInstance.dataValues.id,
       });
 
