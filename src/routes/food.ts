@@ -4,24 +4,32 @@ import { isAuthorized } from '../auth/authorized';
 import {
   createUserFood,
   deleteUserFood,
+  getFoodIngredients,
   getUserFoodList,
   updateUserFood,
 } from '../controllers/food';
 
 const foodRouter = express.Router();
 
-foodRouter.post(
-  '/user/:userId/food',
-  isAuthenticated,
-  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  createUserFood
-);
-
 foodRouter.get(
   '/user/:userId/food',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserFoodList
+);
+
+foodRouter.get(
+  '/user/:userId/food/:foodId',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getFoodIngredients
+);
+
+foodRouter.post(
+  '/user/:userId/food',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  createUserFood
 );
 
 foodRouter.put(

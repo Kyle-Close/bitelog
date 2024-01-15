@@ -17,7 +17,52 @@ import {
   getUserIngredientIdList,
   verifyIngredientIdsInUserTable,
 } from '../ingredients/helpers';
-import { Transaction } from 'sequelize';
+import FoodIngredients from '../../models/joins/FoodIngredients';
+
+export const getUserFoodList = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const foodList = await UserFoods.findAll({
+        where: { UserId: res.locals.uid },
+      });
+      res
+        .status(200)
+        .json({ msg: 'Successfully retrieved user food list.', foodList });
+      return;
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ err: 'Error retrieving user food list.' });
+      return;
+    }
+  }
+);
+
+// Returns list of all ingredients for specified food
+export const getFoodIngredients = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const ingredientsIdList = await getIngredientListByFoodId(
+        Number(req.params.foodId)
+      );
+
+      // use the id list to get all the ingredient instances
+      const ingredientInstances = await getIngredientInstancesByIds(
+        ingredientsIdList
+      );
+
+      res.status(200).json({
+        msg: 'Successfully retrievied food ingredients.',
+        ingredientInstances,
+      });
+      return;
+    } catch (err) {
+      console.log(err);
+
+      res.status(400).json({ err });
+      return;
+    }
+  }
+);
 
 export const createUserFood = [
   body('name')
@@ -108,24 +153,6 @@ export const createUserFood = [
     return;
   }),
 ];
-
-export const getUserFoodList = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const foodList = await UserFoods.findAll({
-        where: { UserId: res.locals.uid },
-      });
-      res
-        .status(200)
-        .json({ msg: 'Successfully retrieved user food list.', foodList });
-      return;
-    } catch (err) {
-      console.log(err);
-      res.status(400).json({ err: 'Error retrieving user food list.' });
-      return;
-    }
-  }
-);
 
 export const updateUserFood = [
   param('foodId').isString().isNumeric(),
