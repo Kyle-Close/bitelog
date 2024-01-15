@@ -12,13 +12,15 @@ import {
   removeManyFoodIngredients,
   getIngredientsToAddList,
   removeUserFood,
+  getIngredientInstancesByIds,
+  extractDataValues,
 } from './helpers';
 import {
   getUserIngredientIdList,
   verifyIngredientIdsInUserTable,
 } from '../ingredients/helpers';
-import FoodIngredients from '../../models/joins/FoodIngredients';
 
+// Returns list of user food instances.
 export const getUserFoodList = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -37,7 +39,7 @@ export const getUserFoodList = asyncHandler(
   }
 );
 
-// Returns list of all ingredients for specified food
+// Returns list of all ingredient data values for specified food
 export const getFoodIngredients = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -50,9 +52,11 @@ export const getFoodIngredients = asyncHandler(
         ingredientsIdList
       );
 
+      const ingredientsDataValues = extractDataValues(ingredientInstances);
+
       res.status(200).json({
         msg: 'Successfully retrievied food ingredients.',
-        ingredientInstances,
+        ingredientsDataValues,
       });
       return;
     } catch (err) {
@@ -64,6 +68,7 @@ export const getFoodIngredients = asyncHandler(
   }
 );
 
+// Creates a user food entry when given a food name and ingredient list
 export const createUserFood = [
   body('name')
     .isString()
@@ -154,6 +159,7 @@ export const createUserFood = [
   }),
 ];
 
+// Updates a user food entry when given a food id, food name, and ingredient list
 export const updateUserFood = [
   param('foodId').isString().isNumeric(),
   body('name')
@@ -268,6 +274,7 @@ export const updateUserFood = [
   }),
 ];
 
+// Deletes a user food based on the user & food id - url
 export const deleteUserFood = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     // Check if the user food exists

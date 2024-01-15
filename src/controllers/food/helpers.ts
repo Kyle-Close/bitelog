@@ -1,6 +1,7 @@
+import Ingredients from '../../models/ingredients';
 import FoodIngredients from '../../models/joins/FoodIngredients';
 import UserFoods from '../../models/user_food';
-import { Transaction } from 'sequelize';
+import { Model, Transaction } from 'sequelize';
 
 export const createFoodIngredientsObjectsForInsertion = (
   ingredientIdList: number[],
@@ -95,4 +96,18 @@ export const removeUserFood = async (
   } catch (err) {
     throw err;
   }
+};
+
+export const getIngredientInstancesByIds = async (
+  ingredientsIdList: number[]
+) => {
+  try {
+    return await Ingredients.findAll({ where: { id: ingredientsIdList } });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const extractDataValues = (modelList: Model[]) => {
+  return modelList.map((model) => model.dataValues);
 };
