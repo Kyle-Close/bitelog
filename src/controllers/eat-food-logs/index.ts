@@ -43,7 +43,7 @@ export const getEatLog = asyncHandler(
   }
 );
 
-// Returns a list of ALL EatFood entries given the user ID
+// Returns a list of ALL EatFood entries given the user ID / journal ID
 export const getUserEatLogs = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const journalId = res.locals.journal.id;
@@ -87,7 +87,7 @@ export const createEatLogEntry = [
     const journalId = res.locals.journal.id;
     const notes: string = req.body.notes;
 
-    // Create list of food ids
+    // Get list of food ids from body
     const foodIds: number[] = getFoodIdList(req.body.foods);
 
     // Check if all foods exist in UserFood table.
@@ -137,3 +137,60 @@ export const createEatLogEntry = [
 ];
 
 // Updates a EatFood entry given log ID, journal ID, food ID list, and notes (optional)
+export const updateEatLogEntry = [
+  body('notes').isString(),
+  body('foods').isArray().isLength({ min: 1 }),
+  body('foods.*.id').isNumeric(),
+  body('foods.*.quantity').isInt(),
+
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({ err: errors.array() });
+      return;
+    }
+
+    const userId = res.locals.uid;
+    const journalId = res.locals.journal.id;
+    const notes: string = req.body.notes;
+
+    // Get list of food ids from body
+    const foodIds: number[] = getFoodIdList(req.body.foods);
+
+    // Check if all foods exist in UserFood table.
+    const isUserFoodExist = await verifyUserFoodExist(foodIds, userId);
+
+    if (!isUserFoodExist) {
+      res.status(400).json({ err: 'Not all foods exist in user food table.' });
+      return;
+    }
+
+    // --- Begin Transaction ---
+    const transaction = await sequelize.transaction();
+
+    try {
+      // Update EatLog entry
+      const eatLogInstance = await EatLogs.create({
+        JournalId: journalId,
+        notes,
+      });
+
+      // Get list of UserFood IDs to be removed from table
+
+      // Remove them if needed
+
+      // Get list of UserFood IDs to be added to table
+
+      // Add them if needed
+
+      // --- Commit Transaction ---
+    } catch (err) {
+      // --- Rollback Transaction ---
+      await transaction.rollback();
+
+      res.status(400).json({ err });
+      return;
+    }
+  }),
+];
