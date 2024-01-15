@@ -215,7 +215,10 @@ export const updateUserFood = [
           name: req.body.name,
           UserId: res.locals.uid,
         },
-        { transaction, where: { UserId: res.locals.uid } }
+        {
+          transaction,
+          where: { UserId: res.locals.uid, id: Number(req.params.foodId) },
+        }
       );
 
       if (!userFoodsInstance) {
