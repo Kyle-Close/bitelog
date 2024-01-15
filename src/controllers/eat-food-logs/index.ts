@@ -2,7 +2,12 @@ import { body, param, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
 import EatLogs from '../../models/eat_logs';
-import { getFoodIdList, verifyUserFoodExist } from './helpers';
+import {
+  createEatLogUserFoodsObjects,
+  createManyEatLogUserFoodsEntries,
+  getFoodIdList,
+  verifyUserFoodExist,
+} from './helpers';
 import { sequelize } from '../../db';
 
 export const createEatFoodEntry = [
@@ -20,17 +25,15 @@ export const createEatFoodEntry = [
       return;
     }
 
-    // Journal ID
-    const JournalId = Number(req.params.journalId);
-
-    // Notes
+    const userId = res.locals.uid;
+    const journalId = res.locals.journal.id;
     const notes: string = req.body.notes;
 
-    // Food ID list
-    const foodIds: number[] = getFoodIdList(req.body.foodIds);
+    // Create list of food ids
+    const foodIds: number[] = getFoodIdList(req.body.foods);
 
     // Check if all foods exist in UserFood table.
-    const isUserFoodExist = await verifyUserFoodExist(foodIds);
+    const isUserFoodExist = await verifyUserFoodExist(foodIds, userId);
 
     if (!isUserFoodExist) {
       res.status(400).json({ err: 'Not all foods exist in user food table.' });
@@ -42,18 +45,28 @@ export const createEatFoodEntry = [
 
     try {
       // Create EatLog entry
-      const eatLogInstance = await EatLogs.create({ JournalId, notes });
+      const eatLogInstance = await EatLogs.create({
+        JournalId: journalId,
+        notes,
+      });
 
       // Create list of objects for creating log entries
       const entriesForInsertion = await createEatLogUserFoodsObjects(
-        req.body.foodIds
+        eatLogInstance.dataValues.id,
+        req.body.foods
       );
 
       // Create EatLogUserFoods entries
-      await createManyEatLogUserFoodsEntries();
+      await createManyEatLogUserFoodsEntries(entriesForInsertion, transaction);
 
       // --- Commit Transaction ---
       await transaction.commit();
+
+      res.status(200).json({
+        msg: 'Successfully created eat food entry.',
+        eatLogInstance: eatLogInstance.dataValues,
+      });
+      return;
     } catch (err) {
       // --- Rollback Transaction ---
       await transaction.rollback();

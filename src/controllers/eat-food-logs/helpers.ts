@@ -9,10 +9,13 @@ type EatLogUserFoodObject = {
 };
 
 export const verifyUserFoodExist = async (
-  foodIds: number[]
+  foodIds: number[],
+  userId: string
 ): Promise<boolean> => {
   try {
-    const userFoods = await UserFoods.findAll({ where: { id: foodIds } });
+    const userFoods = await UserFoods.findAll({
+      where: { id: foodIds, UserId: userId },
+    });
     if (userFoods.length === foodIds.length) return true;
     else return false;
   } catch (err) {
@@ -29,8 +32,19 @@ export const createManyEatLogUserFoodsEntries = async (
   transaction: Transaction
 ) => {
   try {
-    await EatLogUserFoods.bulkCreate(entries, { transaction });
+    return await EatLogUserFoods.bulkCreate(entries, { transaction });
   } catch (err) {
     throw err;
   }
+};
+
+export const createEatLogUserFoodsObjects = async (
+  logId: number,
+  foods: { id: number; quantity: number }[]
+) => {
+  return foods.map((food) => ({
+    EatLogId: logId,
+    UserFoodId: food.id,
+    quantity: food.quantity,
+  }));
 };

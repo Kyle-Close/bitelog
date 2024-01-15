@@ -31,9 +31,9 @@ export const insertManyFoodIngredients = async (
   }
 };
 
-export const getUserFoodByName = async (name: string) => {
+export const getUserFoodByName = async (name: string, userId: string) => {
   return await UserFoods.findOne({
-    where: { name },
+    where: { name, UserId: userId },
   });
 };
 

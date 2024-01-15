@@ -68,11 +68,14 @@ export const createUserIngredient = [
       return;
     }
 
+    const userId = res.locals.uid;
+    const ingredientName = req.body.name;
+
     try {
       // Check if ingredient exists in users list
       const userIngredient = await getUserIngredientInstanceByName(
-        res.locals.uid,
-        req.body.name
+        userId,
+        ingredientName
       );
 
       if (userIngredient) {

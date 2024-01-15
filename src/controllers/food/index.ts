@@ -100,8 +100,11 @@ export const createUserFood = [
       return;
     }
 
+    const userId = res.locals.uid;
+    const foodName = req.body.name;
+
     // Check if food name already exists in user table
-    const foodExists = await getUserFoodByName(req.body.name);
+    const foodExists = await getUserFoodByName(foodName, userId);
 
     if (foodExists) {
       res
@@ -110,7 +113,7 @@ export const createUserFood = [
       return;
     }
 
-    const userIngredientIds = await getUserIngredientIdList(res.locals.uid);
+    const userIngredientIds = await getUserIngredientIdList(userId);
 
     if (!userIngredientIds || userIngredientIds.length === 0) {
       res.status(400).json({ err: 'Error fetching user ingredients.' });
@@ -136,8 +139,8 @@ export const createUserFood = [
       // Insert single UserFood entry. Using userID and name.
       const userFoodsInstance = await UserFoods.create(
         {
-          name: req.body.name,
-          UserId: res.locals.uid,
+          name: foodName,
+          UserId: userId,
         },
         { transaction }
       );
