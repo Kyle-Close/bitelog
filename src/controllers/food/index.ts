@@ -14,6 +14,7 @@ import {
   removeUserFood,
   getIngredientInstancesByIds,
   extractDataValues,
+  getUserFoodInstanceById,
 } from './helpers';
 import {
   getUserIngredientIdList,
@@ -42,6 +43,15 @@ export const getUserFoodList = asyncHandler(
 // Returns list of all ingredient data values for specified food
 export const getFoodIngredients = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Check if the user food exists
+    const userFoodInstance = await getUserFoodInstanceById(
+      Number(req.params.foodId)
+    );
+
+    if (!userFoodInstance) {
+      res.status(400).json({ err: 'Error user food does not exist.' });
+    }
+
     try {
       const ingredientsIdList = await getIngredientListByFoodId(
         Number(req.params.foodId)
@@ -306,4 +316,3 @@ export const deleteUserFood = asyncHandler(
 );
 
 // TODO: Document each endpoint. Expects in body, returns ?
-// TODO: Make endpoint to get all ingredients for specific food

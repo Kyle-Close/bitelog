@@ -37,6 +37,12 @@ export const getUserFoodByName = async (name: string) => {
   });
 };
 
+export const getUserFoodInstanceById = async (id: number) => {
+  return await UserFoods.findOne({
+    where: { id },
+  });
+};
+
 export const getIngredientsToRemoveList = (
   userIngredients: number[],
   updatedIngredients: number[]
