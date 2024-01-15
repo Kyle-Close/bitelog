@@ -14,7 +14,10 @@ export const createEatFoodEntry = [
       return;
     }
 
-    // Check if food entry aleady exists.
+    // Journal ID
+    const journalId = Number(req.params.journalId);
+
+    //
 
     // Create array of objects. Used for inserting into EatFoodLogs
     // [{}]
