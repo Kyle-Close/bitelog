@@ -43,6 +43,7 @@ const associations = () => {
     through: UserIngredients,
     timestamps: false,
   });
+
   Ingredient.belongsToMany(Users, {
     through: UserIngredients,
     timestamps: false,

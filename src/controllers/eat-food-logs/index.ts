@@ -17,7 +17,6 @@ import {
   deleteManyEatLogUserFoods,
 } from './helpers';
 import { sequelize } from '../../db';
-import EatLogUserFoods from '../../models/joins/EatLogUserFoods';
 
 // Returns a single EatLog entry given the id
 export const getEatLog = asyncHandler(
@@ -72,12 +71,6 @@ export const getUserEatLogs = asyncHandler(
       res.status(400).json({ err });
       return;
     }
-  }
-);
-
-export const getUserFoodsInEatLog = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    //
   }
 );
 
@@ -311,5 +304,3 @@ export const deleteManyEatLogEntries = [
     }
   }),
 ];
-
-// TODO: Delete many EatLog entries based on list of IDs
