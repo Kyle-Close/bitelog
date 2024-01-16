@@ -30,6 +30,7 @@ export const getEatLog = asyncHandler(
         eatLogId,
         journalId
       );
+
       if (!eatLogInstance) {
         res
           .status(400)
@@ -71,6 +72,12 @@ export const getUserEatLogs = asyncHandler(
       res.status(400).json({ err });
       return;
     }
+  }
+);
+
+export const getUserFoodsInEatLog = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //
   }
 );
 
@@ -282,5 +289,27 @@ export const deleteEatLogEntry = asyncHandler(
   }
 );
 
-// TODO: Get list of food + quantity for given EatLog id
+// Delete many EatLog entry based on list of EatLog IDs
+export const deleteManyEatLogEntries = [
+  body('logIds').isArray().isLength({ min: 1 }),
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const journalId = res.locals.journal.id;
+    const eatLogIds = req.body.logIds;
+
+    try {
+      await EatLogs.destroy({
+        where: { id: eatLogIds, JournalId: journalId },
+      });
+
+      res.status(200).json({ msg: 'Successfully deleted eat log entries.' });
+      return;
+    } catch (err) {
+      console.log(err);
+
+      res.status(400).json({ err });
+      return;
+    }
+  }),
+];
+
 // TODO: Delete many EatLog entries based on list of IDs

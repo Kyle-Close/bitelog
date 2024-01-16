@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createEatLogEntry,
   deleteEatLogEntry,
+  deleteManyEatLogEntries,
   getEatLog,
   getUserEatLogs,
   updateEatLogEntry,
@@ -50,6 +51,14 @@ eatLogRouter.delete(
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserJournal,
   deleteEatLogEntry
+);
+
+eatLogRouter.delete(
+  '/user/:userId/journal/:journalId/eat_logs',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getUserJournal,
+  deleteManyEatLogEntries
 );
 
 export { eatLogRouter };

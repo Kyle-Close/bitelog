@@ -67,6 +67,7 @@ export const getJournalEatLogInstanceById = async (
   try {
     return await EatLogs.findOne({
       where: { id: logId, JournalId: journalId },
+      include: [UserFoods],
     });
   } catch (err) {
     throw err;
