@@ -215,7 +215,7 @@ export const updateEatLogEntry = [
 
     try {
       // Update EatLog entry
-      const updatedEatLogInstance = await updateJournalEatLogEntry(
+      const updateResponse = await updateJournalEatLogEntry(
         eatLogId,
         journalId,
         notes,
@@ -243,7 +243,11 @@ export const updateEatLogEntry = [
       // --- Commit Transaction ---
       await transaction.commit();
 
-      res.status(200).json({ msg: 'Successfully updated eat log entry.' });
+      const eatLogDataValues = updateResponse[1][0].dataValues;
+
+      res
+        .status(200)
+        .json({ msg: 'Successfully updated eat log entry.', eatLogDataValues });
       return;
     } catch (err) {
       // --- Rollback Transaction ---

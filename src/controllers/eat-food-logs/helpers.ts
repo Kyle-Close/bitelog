@@ -105,7 +105,11 @@ export const updateJournalEatLogEntry = async (
       {
         notes,
       },
-      { where: { id: logId, JournalId: journalId }, transaction }
+      {
+        where: { id: logId, JournalId: journalId },
+        transaction,
+        returning: true,
+      }
     );
   } catch (err) {
     throw err;
