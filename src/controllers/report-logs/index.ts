@@ -4,10 +4,17 @@ import { NextFunction, Request, Response } from 'express';
 import ReportLogs from '../../models/report_log';
 
 export const createReportLog = [
-  body('discomfortRating').isString().isNumeric(),
-  body('notes').isString().isLength({ min: 1, max: 1000 }),
+  body('discomfortRating').exists().isString().isNumeric(),
+  body('notes').exists().isString().isLength({ min: 1, max: 1000 }),
 
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({ err: errors.array() });
+      return;
+    }
+
     try {
       const reportLogInstance = ReportLogs.create({
         JournalId: res.locals.journal.id,
