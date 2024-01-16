@@ -6,9 +6,15 @@ import {
   createEatLogUserFoodsObjects,
   createManyEatLogUserFoodsEntries,
   getFoodIdList,
-  verifyUserFoodExist,
   getJournalEatLogInstanceById,
   getAllEatLogInstancesByJournalId,
+  updateJournalEatLogEntry,
+  getAllUserFoods,
+  getEatLogUserFoodInstances,
+  insertManyEatLogUserFoods,
+  getEatLogUserFoodObjList,
+  addQuantitiesToUserFoodIdList,
+  deleteManyEatLogUserFoods,
 } from './helpers';
 import { sequelize } from '../../db';
 
@@ -67,7 +73,7 @@ export const getUserEatLogs = asyncHandler(
   }
 );
 
-// Creates a EatFood entry given a journal ID, food ID list, and notes (optional)
+// Creates a EatLog entry given a journal ID, food ID list, and notes (optional)
 export const createEatLogEntry = [
   param('journalId').isNumeric(),
   body('notes').isString(),
@@ -87,11 +93,19 @@ export const createEatLogEntry = [
     const journalId = res.locals.journal.id;
     const notes: string = req.body.notes;
 
-    // Get list of food ids from body
+    // Get list of food ids to update to - from body
     const foodIds: number[] = getFoodIdList(req.body.foods);
 
+    // Get list of all UserFood instances
+    const userFoodInstances = await getAllUserFoods(userId);
+
+    // Create list of UserFood IDs
+    const userFoodIds = (await userFoodInstances).map(
+      (instance) => instance.dataValues.id
+    );
+
     // Check if all foods exist in UserFood table.
-    const isUserFoodExist = await verifyUserFoodExist(foodIds, userId);
+    const isUserFoodExist = foodIds.every((id) => userFoodIds.includes(id));
 
     if (!isUserFoodExist) {
       res.status(400).json({ err: 'Not all foods exist in user food table.' });
@@ -139,7 +153,7 @@ export const createEatLogEntry = [
 // Updates a EatFood entry given log ID, journal ID, food ID list, and notes (optional)
 export const updateEatLogEntry = [
   body('notes').isString(),
-  body('foods').isArray().isLength({ min: 1 }),
+  body('foods').custom((value) => Array.isArray(value) && value.length > 0),
   body('foods.*.id').isNumeric(),
   body('foods.*.quantity').isInt(),
 
@@ -153,38 +167,84 @@ export const updateEatLogEntry = [
 
     const userId = res.locals.uid;
     const journalId = res.locals.journal.id;
+    const eatLogId = Number(req.params.eatLogId);
     const notes: string = req.body.notes;
 
     // Get list of food ids from body
-    const foodIds: number[] = getFoodIdList(req.body.foods);
+    const postFoodIds: number[] = getFoodIdList(req.body.foods);
+
+    // Get list of all UserFood instances
+    const userFoodInstances = await getAllUserFoods(userId);
+
+    // Create list of UserFood IDs
+    const userFoodIds = (await userFoodInstances).map(
+      (instance) => instance.dataValues.id
+    );
 
     // Check if all foods exist in UserFood table.
-    const isUserFoodExist = await verifyUserFoodExist(foodIds, userId);
+    const isUserFoodExist = postFoodIds.every((id) => userFoodIds.includes(id));
 
     if (!isUserFoodExist) {
       res.status(400).json({ err: 'Not all foods exist in user food table.' });
       return;
     }
 
+    // Get current EatLogUserFoods instances based on UserFoodId + EatLogId
+    const preLogUserFoodInstances = await getEatLogUserFoodInstances(eatLogId);
+
+    const preLogUserFoodDataValues = preLogUserFoodInstances.map(
+      (instance) => instance.dataValues
+    );
+
+    const preUserFoodIds = preLogUserFoodDataValues.map(
+      (dataValue) => dataValue.UserFoodId
+    );
+
+    // Returns list of food ids that need to be added to EatLogUserFoods
+    const userFoodIdsToAdd = postFoodIds.filter(
+      (id) => !preUserFoodIds.includes(id)
+    );
+
+    // Returns a list food ids that need to be removed from EatLogUserFoods
+    const userFoodIdsToRemove = preUserFoodIds.filter(
+      (id) => !postFoodIds.includes(id)
+    );
+
     // --- Begin Transaction ---
     const transaction = await sequelize.transaction();
 
     try {
       // Update EatLog entry
-      const eatLogInstance = await EatLogs.create({
-        JournalId: journalId,
+      const updatedEatLogInstance = await updateJournalEatLogEntry(
+        eatLogId,
+        journalId,
         notes,
-      });
+        transaction
+      );
 
-      // Get list of UserFood IDs to be removed from table
+      if (userFoodIdsToAdd.length > 0) {
+        // Bulk insert the missing EatLogUserFood entries
+        const eatLogUserFoodObjList = getEatLogUserFoodObjList(
+          eatLogId,
+          addQuantitiesToUserFoodIdList(userFoodIdsToAdd, req.body.foods)
+        );
+        await insertManyEatLogUserFoods(eatLogUserFoodObjList, transaction);
+      }
 
-      // Remove them if needed
-
-      // Get list of UserFood IDs to be added to table
-
-      // Add them if needed
+      if (userFoodIdsToRemove.length > 0) {
+        // Remove all the entries with these ids
+        await deleteManyEatLogUserFoods(
+          userFoodIdsToRemove,
+          eatLogId,
+          transaction
+        );
+      }
 
       // --- Commit Transaction ---
+      await transaction.commit();
+
+      res.status(200).json({ msg: 'Successfully updated eat log entry.' });
+      return;
     } catch (err) {
       // --- Rollback Transaction ---
       await transaction.rollback();

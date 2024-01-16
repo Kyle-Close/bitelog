@@ -3,6 +3,7 @@ import {
   createEatLogEntry,
   getEatLog,
   getUserEatLogs,
+  updateEatLogEntry,
 } from '../controllers/eat-food-logs';
 import { isAuthenticated } from '../auth/authenticate';
 import { isAuthorized } from '../auth/authorized';
@@ -32,6 +33,14 @@ eatLogRouter.post(
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserJournal,
   createEatLogEntry
+);
+
+eatLogRouter.put(
+  '/user/:userId/journal/:journalId/eat_logs/:eatLogId',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getUserJournal,
+  updateEatLogEntry
 );
 
 export { eatLogRouter };

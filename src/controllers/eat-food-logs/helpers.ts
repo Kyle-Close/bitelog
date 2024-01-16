@@ -9,16 +9,26 @@ type EatLogUserFoodObject = {
   quantity: number;
 };
 
-export const verifyUserFoodExist = async (
-  foodIds: number[],
-  userId: string
-): Promise<boolean> => {
+export const getAllUserFoods = async (userId: string) => {
   try {
-    const userFoods = await UserFoods.findAll({
-      where: { id: foodIds, UserId: userId },
+    return await UserFoods.findAll({
+      where: { UserId: userId },
     });
-    if (userFoods.length === foodIds.length) return true;
-    else return false;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getFoodIdsByEatLogId = async (
+  userId: string,
+  foodIds: number[],
+  transaction?: Transaction
+) => {
+  try {
+    return await EatLogs.findAll({
+      where: { UserId: userId, FoodId: foodIds },
+      transaction,
+    });
   } catch (err) {
     throw err;
   }
@@ -66,6 +76,93 @@ export const getJournalEatLogInstanceById = async (
 export const getAllEatLogInstancesByJournalId = async (journalId: number) => {
   try {
     return await EatLogs.findAll({ where: { JournalId: journalId } });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getEatLogUserFoods = async (
+  userFoodId: number,
+  eatLogId: number
+) => {
+  try {
+    return await EatLogUserFoods.findAll({
+      where: { UserFoodId: userFoodId, EatLogId: eatLogId },
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const updateJournalEatLogEntry = async (
+  logId: number,
+  journalId: number,
+  notes: string,
+  transaction: Transaction
+) => {
+  try {
+    return await EatLogs.update(
+      {
+        notes,
+      },
+      { where: { id: logId, JournalId: journalId }, transaction }
+    );
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getEatLogUserFoodInstances = async (eatLogId: number) => {
+  try {
+    return await EatLogUserFoods.findAll({
+      where: { EatLogId: eatLogId },
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+// Given a list of food ids and log id add them in bulk
+export const insertManyEatLogUserFoods = async (
+  eatLogUserFoods: EatLogUserFoodObject[],
+  transaction?: Transaction
+) => {
+  try {
+    return await EatLogUserFoods.bulkCreate(eatLogUserFoods, { transaction });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getEatLogUserFoodObjList = (
+  eatLogId: number,
+  foods: { id: number; quantity: number }[]
+) => {
+  return foods.map((food) => ({
+    EatLogId: eatLogId,
+    UserFoodId: food.id,
+    quantity: food.quantity,
+  }));
+};
+
+export const addQuantitiesToUserFoodIdList = (
+  userFoodIds: number[],
+  bodyFoodList: { id: number; quantity: number }[]
+) => {
+  return bodyFoodList.filter((food) => userFoodIds.includes(food.id));
+};
+
+// Given list of UserFood IDs & EatLog ID, delete them
+export const deleteManyEatLogUserFoods = async (
+  userFoodIds: number[],
+  eatLogId: number,
+  transaction?: Transaction
+) => {
+  try {
+    return await EatLogUserFoods.destroy({
+      where: { UserFoodId: userFoodIds, EatLogId: eatLogId },
+      transaction,
+    });
   } catch (err) {
     throw err;
   }
