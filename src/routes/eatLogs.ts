@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createEatLogEntry,
+  deleteEatLogEntry,
   getEatLog,
   getUserEatLogs,
   updateEatLogEntry,
@@ -41,6 +42,14 @@ eatLogRouter.put(
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserJournal,
   updateEatLogEntry
+);
+
+eatLogRouter.delete(
+  '/user/:userId/journal/:journalId/eat_logs/:eatLogId',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getUserJournal,
+  deleteEatLogEntry
 );
 
 export { eatLogRouter };
