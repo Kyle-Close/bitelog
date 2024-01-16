@@ -254,3 +254,7 @@ export const updateEatLogEntry = [
     }
   }),
 ];
+
+// TODO: Get list of food + quantity for given EatLog id
+// TODO: Delete a specific EatLog entry based on ID
+// TODO: Delete many EatLog entries based on list of IDs
