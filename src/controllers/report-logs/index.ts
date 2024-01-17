@@ -98,3 +98,18 @@ export const updateReportLog = [
 ];
 
 // delete report log by id
+export const deleteReportLog = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await ReportLogs.destroy({ where: { id: req.params.reportLogId } });
+
+      res.status(200).json({ msg: 'Successfully deleted report log.' });
+      return;
+    } catch (err) {
+      console.log(err);
+
+      res.status(400).json({ err });
+      return;
+    }
+  }
+);

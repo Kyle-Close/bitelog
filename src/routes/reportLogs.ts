@@ -4,6 +4,7 @@ import { isAuthorized } from '../auth/authorized';
 import { getUserJournal } from '../controllers/journal';
 import {
   createReportLog,
+  deleteReportLog,
   getReportLog,
   updateReportLog,
 } from '../controllers/report-logs';
@@ -32,6 +33,14 @@ reportRouter.put(
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserJournal,
   updateReportLog
+);
+
+reportRouter.delete(
+  '/user/:userId/journal/:journalId/report_logs/:reportLogId',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getUserJournal,
+  deleteReportLog
 );
 
 export { reportRouter };
