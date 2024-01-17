@@ -46,12 +46,10 @@ export const getManyReportLogs = asyncHandler(
         return;
       }
 
-      res
-        .status(200)
-        .json({
-          msg: `Successfully retrieved report logs from last ${timeQuery}h.`,
-          reportLogs,
-        });
+      res.status(200).json({
+        msg: `Successfully retrieved report logs from last ${timeQuery}h.`,
+        reportLogs,
+      });
       return;
     } catch (err) {
       console.log(err);
@@ -75,15 +73,20 @@ export const createReportLog = [
     }
 
     try {
-      const reportLogInstance = ReportLogs.create({
-        JournalId: res.locals.journal.id,
-        discomfort_rating: req.body.discomfortRating,
-        notes: req.body.notes,
-      });
+      const reportLogInstance = await ReportLogs.create(
+        {
+          JournalId: res.locals.journal.id,
+          discomfort_rating: req.body.discomfortRating,
+          notes: req.body.notes,
+        },
+        { returning: true }
+      );
+
+      const reportLogDataValues = reportLogInstance.dataValues;
 
       res
         .status(200)
-        .json({ msg: 'Successfully created report log.', reportLogInstance });
+        .json({ msg: 'Successfully created report log.', reportLogDataValues });
       return;
     } catch (err) {
       console.log(err);
