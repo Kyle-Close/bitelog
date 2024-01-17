@@ -1,7 +1,7 @@
 import express from 'express';
 import { isAuthenticated } from '../auth/authenticate';
 import { isAuthorized } from '../auth/authorized';
-import { getUserJournal } from '../controllers/journal';
+import { attachUserJournalToResponse } from '../controllers/journal';
 import {
   createReportLog,
   deleteReportLog,
@@ -16,7 +16,7 @@ reportRouter.get(
   '/user/:userId/journal/:journalId/report_logs/:reportLogId',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  getUserJournal,
+  attachUserJournalToResponse,
   getReportLog
 );
 
@@ -24,7 +24,7 @@ reportRouter.get(
   '/user/:userId/journal/:journalId/report_logs',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  getUserJournal,
+  attachUserJournalToResponse,
   getManyReportLogs
 );
 
@@ -32,7 +32,7 @@ reportRouter.post(
   '/user/:userId/journal/:journalId/report_logs',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  getUserJournal,
+  attachUserJournalToResponse,
   createReportLog
 );
 
@@ -40,7 +40,7 @@ reportRouter.put(
   '/user/:userId/journal/:journalId/report_logs/:reportLogId',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  getUserJournal,
+  attachUserJournalToResponse,
   updateReportLog
 );
 
@@ -48,7 +48,7 @@ reportRouter.delete(
   '/user/:userId/journal/:journalId/report_logs/:reportLogId',
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
-  getUserJournal,
+  attachUserJournalToResponse,
   deleteReportLog
 );
 
