@@ -2,8 +2,10 @@ import { body, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
 import ReportLogs from '../../models/report_log';
-import { updateReportLogInstance } from './helpers';
+import { subtractHoursFromDate, updateReportLogInstance } from './helpers';
+import { Op } from 'sequelize';
 
+// Return a single report log based on id provided in URL
 export const getReportLog = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -26,7 +28,38 @@ export const getReportLog = asyncHandler(
   }
 );
 
-// Get all for user - default to return past 24 hours. can modify in param query
+// Get many report entries in journal based on query params
+export const getManyReportLogs = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const timeQuery = req.query.time;
+    const hoursToGoBack = Number(timeQuery);
+    const currentDate = new Date();
+    const queryDate = subtractHoursFromDate(hoursToGoBack, currentDate);
+
+    try {
+      const reportLogs = await ReportLogs.findAll({
+        where: { createdAt: { [Op.between]: [queryDate, currentDate] } },
+      });
+
+      if (!reportLogs) {
+        res.status(400).json({ err: 'Report log does not exist.' });
+        return;
+      }
+
+      res
+        .status(200)
+        .json({
+          msg: `Successfully retrieved report logs from last ${timeQuery}h.`,
+          reportLogs,
+        });
+      return;
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ err });
+      return;
+    }
+  }
+);
 
 // Create a single report log entry in journal for user.
 export const createReportLog = [
@@ -61,7 +94,7 @@ export const createReportLog = [
   }),
 ];
 
-// Update a signle report log entry in journal for user.
+// Update a single report log entry in journal for user.
 export const updateReportLog = [
   body('discomfortRating').exists().isString().isNumeric(),
   body('notes').exists().isString().isLength({ min: 1, max: 1000 }),
@@ -97,7 +130,7 @@ export const updateReportLog = [
   }),
 ];
 
-// delete report log by id
+// Delete a single report log entry in journal for user
 export const deleteReportLog = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

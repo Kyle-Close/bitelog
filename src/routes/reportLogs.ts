@@ -5,6 +5,7 @@ import { getUserJournal } from '../controllers/journal';
 import {
   createReportLog,
   deleteReportLog,
+  getManyReportLogs,
   getReportLog,
   updateReportLog,
 } from '../controllers/report-logs';
@@ -17,6 +18,14 @@ reportRouter.get(
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getUserJournal,
   getReportLog
+);
+
+reportRouter.get(
+  '/user/:userId/journal/:journalId/report_logs',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getUserJournal,
+  getManyReportLogs
 );
 
 reportRouter.post(

@@ -22,3 +22,13 @@ export const updateReportLogInstance = async (
     throw err;
   }
 };
+
+// Given a date, returns a new date with the amount of hours subtracted
+export const subtractHoursFromDate = (hours: number, date: Date) => {
+  const MS_IN_MINUTE = 60000;
+
+  const givenDateInMs = date.valueOf();
+  const msToSubtract = hours * (MS_IN_MINUTE * 60);
+
+  return new Date(givenDateInMs - msToSubtract);
+};
