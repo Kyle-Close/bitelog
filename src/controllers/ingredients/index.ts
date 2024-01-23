@@ -28,22 +28,17 @@ export const getIngredients = asyncHandler(
 
 export const getUserIngredients = asyncHandler(
   async (req: Request, res: Response) => {
-    const ingredients: any = await Users.findByPk(res.locals.uid, {
-      include: [
-        {
-          model: Ingredient,
-          through: {
-            attributes: [],
-          },
-        },
-      ],
+    const ingredientsResult: any = await UserIngredients.findAll({
+      where: { UserId: res.locals.uid },
     });
 
-    if (ingredients) {
-      const ingredientArray = ingredients.Ingredients;
+    if (ingredientsResult) {
+      const ingredients = ingredientsResult.map(
+        (ingredient: any) => ingredient.dataValues
+      );
       res.status(200).json({
         msg: 'Successfully retrieved user ingredients.',
-        ingredients: ingredientArray,
+        ingredients,
       });
       return;
     } else {
