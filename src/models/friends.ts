@@ -26,7 +26,6 @@ const Friends = sequelize.define(
   },
   {
     tableName: 'Friends',
-    timestamps: false,
   }
 );
 

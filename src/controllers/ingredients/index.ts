@@ -28,12 +28,18 @@ export const getIngredients = asyncHandler(
 
 export const getUserIngredients = asyncHandler(
   async (req: Request, res: Response) => {
-    const ingredientsResult: any = await UserIngredients.findAll({
-      where: { UserId: res.locals.uid },
+    const userWithIngredients: any = await Users.findOne({
+      where: { id: res.locals.uid },
+      include: [
+        {
+          model: Ingredient,
+          through: { attributes: [] },
+        },
+      ],
     });
 
-    if (ingredientsResult) {
-      const ingredients = ingredientsResult.map(
+    if (userWithIngredients) {
+      const ingredients = userWithIngredients.Ingredients.map(
         (ingredient: any) => ingredient.dataValues
       );
       res.status(200).json({

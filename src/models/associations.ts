@@ -31,22 +31,18 @@ const associations = () => {
   // Food_Ingredients
   UserFoods.belongsToMany(Ingredient, {
     through: FoodIngredients,
-    timestamps: false,
   });
   Ingredient.belongsToMany(UserFoods, {
     through: FoodIngredients,
-    timestamps: false,
   });
 
   // User_Ingredients
   Users.belongsToMany(Ingredient, {
     through: UserIngredients,
-    timestamps: false,
   });
 
   Ingredient.belongsToMany(Users, {
     through: UserIngredients,
-    timestamps: false,
   });
 
   sequelize.sync();

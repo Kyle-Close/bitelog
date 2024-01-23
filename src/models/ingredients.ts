@@ -10,7 +10,6 @@ const Ingredients = sequelize.define(
   },
   {
     tableName: 'Ingredients',
-    timestamps: false,
   }
 );
 

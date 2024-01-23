@@ -11,7 +11,6 @@ const UserFoods = sequelize.define(
   },
   {
     tableName: 'UserFoods',
-    timestamps: false,
   }
 );
 

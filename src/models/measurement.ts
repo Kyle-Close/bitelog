@@ -15,7 +15,6 @@ const Measurement = sequelize.define(
   },
   {
     tableName: 'Measurements',
-    timestamps: false,
   }
 );
 

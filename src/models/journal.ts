@@ -11,7 +11,6 @@ const Journal = sequelize.define(
   },
   {
     tableName: 'Journals',
-    timestamps: false,
   }
 );
 
