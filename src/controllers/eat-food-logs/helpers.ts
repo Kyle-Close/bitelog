@@ -2,6 +2,7 @@ import { Transaction } from 'sequelize';
 import EatLogUserFoods from '../../models/joins/EatLogUserFoods';
 import UserFoods from '../../models/user_food';
 import EatLogs from '../../models/eat_logs';
+import { Op } from 'sequelize';
 
 type EatLogUserFoodObject = {
   EatLogId: number;
@@ -74,9 +75,18 @@ export const getJournalEatLogInstanceById = async (
   }
 };
 
-export const getAllEatLogInstancesByJournalId = async (journalId: number) => {
+export const getManyEatLogs = async (
+  journalId: number,
+  queryDate: Date,
+  currentDate: Date
+) => {
   try {
-    return await EatLogs.findAll({ where: { JournalId: journalId } });
+    return await EatLogs.findAll({
+      where: {
+        JournalId: journalId,
+        createdAt: { [Op.between]: [queryDate, currentDate] },
+      },
+    });
   } catch (err) {
     throw err;
   }

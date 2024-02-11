@@ -7,7 +7,7 @@ import {
   createManyEatLogUserFoodsEntries,
   getFoodIdList,
   getJournalEatLogInstanceById,
-  getAllEatLogInstancesByJournalId,
+  getManyEatLogs,
   updateJournalEatLogEntry,
   getAllUserFoods,
   getEatLogUserFoodInstances,
@@ -17,6 +17,7 @@ import {
   deleteManyEatLogUserFoods,
 } from './helpers';
 import { sequelize } from '../../db';
+import { subtractHoursFromDate } from '../report-logs/helpers';
 
 // Returns a single EatLog entry given the id
 export const getEatLog = asyncHandler(
@@ -53,10 +54,19 @@ export const getEatLog = asyncHandler(
 // Returns a list of ALL EatFood entries given the user ID / journal ID
 export const getUserEatLogs = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const timeQuery = req.query.time;
+    const hoursToGoBack = Number(timeQuery);
+    const currentDate = new Date();
+    const queryDate = subtractHoursFromDate(hoursToGoBack, currentDate);
+
     const journalId = res.locals.journal.id;
 
     try {
-      const eatLogInstances = await getAllEatLogInstancesByJournalId(journalId);
+      const eatLogInstances = await getManyEatLogs(
+        journalId,
+        queryDate,
+        currentDate
+      );
       const eatLogDataValues = eatLogInstances.map(
         (instance) => instance.dataValues
       );
