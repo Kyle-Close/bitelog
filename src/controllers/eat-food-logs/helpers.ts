@@ -77,14 +77,14 @@ export const getJournalEatLogInstanceById = async (
 
 export const getManyEatLogs = async (
   journalId: number,
-  queryDate: Date,
-  currentDate: Date
+  fromDate: Date,
+  toDate: Date
 ) => {
   try {
     return await EatLogs.findAll({
       where: {
         JournalId: journalId,
-        createdAt: { [Op.between]: [queryDate, currentDate] },
+        createdAt: { [Op.between]: [fromDate, toDate] },
       },
     });
   } catch (err) {
@@ -182,3 +182,8 @@ export const deleteManyEatLogUserFoods = async (
     throw err;
   }
 };
+export function convertDateQueryParamToDate(from: string) {
+  // input - 2024-02-11
+  const parts = from.split('-');
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+}
