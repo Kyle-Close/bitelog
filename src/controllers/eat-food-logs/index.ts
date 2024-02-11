@@ -77,7 +77,7 @@ export const getUserEatLogs = asyncHandler(
       );
 
       res.status(200).json({
-        msg: 'Successfully retrieved eat logs for specified journal',
+        msg: `Successfully retrieved eat logs between ${fromQuery} and ${toQuery}`,
         eatLogDataValues,
       });
       return;
