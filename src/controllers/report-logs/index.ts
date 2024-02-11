@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import ReportLogs from '../../models/report_log';
 import { subtractHoursFromDate, updateReportLogInstance } from './helpers';
 import { Op } from 'sequelize';
+import { convertDateQueryParamToDate } from '../eat-food-logs/helpers';
 
 // Return a single report log based on id provided in URL
 export const getReportLog = asyncHandler(
@@ -31,14 +32,22 @@ export const getReportLog = asyncHandler(
 // Get many report entries in journal based on query params
 export const getManyReportLogs = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const timeQuery = req.query.time;
-    const hoursToGoBack = Number(timeQuery);
-    const currentDate = new Date();
-    const queryDate = subtractHoursFromDate(hoursToGoBack, currentDate);
+    const fromQuery = req.query.from as string; // YYYY-MM-DD
+    const toQuery = req.query.to as string; // YYYY-MM-DD
+
+    if (!fromQuery || !toQuery) {
+      res
+        .status(400)
+        .json({ err: "Must send 'from' and 'to' dates as query params." });
+      return;
+    }
+
+    const fromDate = convertDateQueryParamToDate(fromQuery);
+    const toDate = convertDateQueryParamToDate(toQuery);
 
     try {
       const reportLogs = await ReportLogs.findAll({
-        where: { createdAt: { [Op.between]: [queryDate, currentDate] } },
+        where: { createdAt: { [Op.between]: [fromDate, toDate] } },
       });
 
       if (!reportLogs) {
@@ -47,7 +56,7 @@ export const getManyReportLogs = asyncHandler(
       }
 
       res.status(200).json({
-        msg: `Successfully retrieved report logs from last ${timeQuery}h.`,
+        msg: `Successfully retrieved report logs between ${fromQuery} to ${toQuery}.`,
         reportLogs,
       });
       return;
