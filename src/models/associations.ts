@@ -45,7 +45,7 @@ const associations = () => {
     through: UserIngredients,
   });
 
-  sequelize.sync();
+  sequelize.sync({ force: true });
 };
 
 export default associations;

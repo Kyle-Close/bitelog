@@ -4,7 +4,7 @@ import { sequelize } from '../db';
 const ReportLogs = sequelize.define(
   'ReportLogs',
   {
-    discomfort_rating: {
+    discomfortRating: {
       type: DataTypes.ENUM,
       values: ['1', '2', '3', '4', '5'],
       allowNull: false,
@@ -12,6 +12,10 @@ const ReportLogs = sequelize.define(
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    logTimestamp: {
+      type: DataTypes.DATE,
+      allowNull: false,
     },
   },
   {

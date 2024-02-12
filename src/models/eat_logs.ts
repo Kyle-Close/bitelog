@@ -8,6 +8,10 @@ const EatLogs = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    logTimestamp: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   },
   {
     tableName: 'EatLogs',

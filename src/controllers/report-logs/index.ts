@@ -2,7 +2,7 @@ import { body, validationResult } from 'express-validator';
 import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
 import ReportLogs from '../../models/report_log';
-import { subtractHoursFromDate, updateReportLogInstance } from './helpers';
+import { updateReportLogInstance } from './helpers';
 import { Op } from 'sequelize';
 import { convertDateQueryParamToDate } from '../eat-food-logs/helpers';
 
@@ -71,6 +71,7 @@ export const getManyReportLogs = asyncHandler(
 // Create a single report log entry in journal for user.
 export const createReportLog = [
   body('discomfortRating').exists().isString().isNumeric(),
+  body('logTimestamp').isISO8601().withMessage('Must be a valid ISO8601 date'),
   body('notes').exists().isString().isLength({ min: 1, max: 1000 }),
 
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -85,8 +86,9 @@ export const createReportLog = [
       const reportLogInstance = await ReportLogs.create(
         {
           JournalId: res.locals.journal.id,
-          discomfort_rating: req.body.discomfortRating,
+          discomfortRating: req.body.discomfortRating,
           notes: req.body.notes,
+          logTimestamp: req.body.logTimestamp,
         },
         { returning: true }
       );

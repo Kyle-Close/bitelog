@@ -17,7 +17,6 @@ import {
   deleteManyEatLogUserFoods,
 } from './helpers';
 import { sequelize } from '../../db';
-import { subtractHoursFromDate } from '../report-logs/helpers';
 import { convertDateQueryParamToDate } from './helpers';
 
 // Returns a single EatLog entry given the id
@@ -91,6 +90,7 @@ export const getUserEatLogs = asyncHandler(
 // Creates a EatLog entry given a journal ID, food ID list, and notes (optional)
 export const createEatLogEntry = [
   param('journalId').isNumeric(),
+  body('logTimestamp').isISO8601().withMessage('Must be a valid ISO8601 date'),
   body('notes').isString(),
   body('foods').isArray().isLength({ min: 1 }),
   body('foods.*.id').isNumeric(),
@@ -107,6 +107,7 @@ export const createEatLogEntry = [
     const userId = res.locals.uid;
     const journalId = res.locals.journal.id;
     const notes: string = req.body.notes;
+    const logTimestamp = req.body.logTimestamp;
 
     // Get list of food ids to update to - from body
     const foodIds: number[] = getFoodIdList(req.body.foods);
@@ -135,6 +136,7 @@ export const createEatLogEntry = [
       const eatLogInstance = await EatLogs.create({
         JournalId: journalId,
         notes,
+        logTimestamp,
       });
 
       // Create list of objects for creating log entries
