@@ -53,7 +53,6 @@ export const sendUserJournalResponse = asyncHandler(
 export const getAllUserJournals = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = res.locals.uid;
-
     try {
       const journalInstances = await Journal.findAll({
         where: { UserId: userId },
