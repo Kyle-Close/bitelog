@@ -5,6 +5,7 @@ import {
   createUserFood,
   deleteUserFood,
   getFoodIngredients,
+  getManyFoodIngredients,
   getUserFoodList,
   updateUserFood,
 } from '../controllers/food';
@@ -23,6 +24,13 @@ foodRouter.get(
   isAuthenticated,
   isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
   getFoodIngredients
+);
+
+foodRouter.post(
+  '/user/:userId/food/bulk',
+  isAuthenticated,
+  isAuthorized({ hasRole: ['admin'], allowSameUser: true }),
+  getManyFoodIngredients
 );
 
 foodRouter.post(

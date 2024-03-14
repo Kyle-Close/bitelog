@@ -15,81 +15,87 @@ import {
   getIngredientInstancesByIds,
   extractDataValues,
   getUserFoodInstanceById,
+  getManyIngredientListsByFoodIds,
 } from './helpers';
-import {
-  getUserIngredientIdList,
-  verifyIngredientIdsInUserTable,
-} from '../ingredients/helpers';
+import { getUserIngredientIdList, verifyIngredientIdsInUserTable } from '../ingredients/helpers';
 
 // Returns list of user food instances.
-export const getUserFoodList = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const foodInstances = await UserFoods.findAll({
-        where: { UserId: res.locals.uid },
-      });
+export const getUserFoodList = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const foodInstances = await UserFoods.findAll({
+      where: { UserId: res.locals.uid },
+    });
 
-      const foodDataValues = await foodInstances.map(
-        (instance) => instance.dataValues
-      );
+    const foodDataValues = await foodInstances.map((instance) => instance.dataValues);
 
-      res.status(200).json({
-        msg: 'Successfully retrieved user food list.',
-        foodDataValues,
-      });
-      return;
-    } catch (err) {
-      console.log(err);
-      res.status(400).json({ err: 'Error retrieving user food list.' });
-      return;
-    }
+    res.status(200).json({
+      msg: 'Successfully retrieved user food list.',
+      foodDataValues,
+    });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ err: 'Error retrieving user food list.' });
+    return;
   }
-);
+});
 
 // Returns list of all ingredient data values for specified food
-export const getFoodIngredients = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    // Check if the user food exists
-    const userFoodInstance = await getUserFoodInstanceById(
-      Number(req.params.foodId)
-    );
+export const getFoodIngredients = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  // Check if the user food exists
+  const userFoodInstance = await getUserFoodInstanceById(Number(req.params.foodId));
 
-    if (!userFoodInstance) {
-      res.status(400).json({ err: 'Error user food does not exist.' });
-    }
-
-    try {
-      const ingredientsIdList = await getIngredientListByFoodId(
-        Number(req.params.foodId)
-      );
-
-      // use the id list to get all the ingredient instances
-      const ingredientInstances = await getIngredientInstancesByIds(
-        ingredientsIdList
-      );
-
-      const ingredientsDataValues = extractDataValues(ingredientInstances);
-
-      res.status(200).json({
-        msg: 'Successfully retrievied food ingredients.',
-        ingredientsDataValues,
-      });
-      return;
-    } catch (err) {
-      console.log(err);
-
-      res.status(400).json({ err });
-      return;
-    }
+  if (!userFoodInstance) {
+    res.status(400).json({ err: 'Error user food does not exist.' });
   }
-);
+
+  try {
+    const ingredientsIdList = await getIngredientListByFoodId(Number(req.params.foodId));
+
+    // use the id list to get all the ingredient instances
+    const ingredientInstances = await getIngredientInstancesByIds(ingredientsIdList);
+
+    const ingredientsDataValues = extractDataValues(ingredientInstances);
+
+    res.status(200).json({
+      msg: 'Successfully retrievied food ingredients.',
+      ingredientsDataValues,
+    });
+    return;
+  } catch (err) {
+    console.log(err);
+
+    res.status(400).json({ err });
+    return;
+  }
+});
+
+// Gets a list of all ingredients in a list of foods (food ids)
+export const getManyFoodIngredients = [
+  body('foodIds').isArray().isLength({ min: 1 }),
+  body('foodIds.*').isNumeric(),
+  asyncHandler(async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ err: errors.array() });
+      return;
+    }
+    // use list of ids and get results
+    const ingredientIdLists = await getManyIngredientListsByFoodIds(req.body.foodIds);
+    const promises = ingredientIdLists.map((foodIngredientIds) => getIngredientInstancesByIds(foodIngredientIds));
+    const promiseResult = await Promise.all(promises);
+    const foodIngredients = promiseResult.map((model) => {
+      return model.map((data) => data.dataValues);
+    });
+
+    res.status(200).json({ msg: 'Successfully retrieved bulk food ingredients', foodIngredients });
+    return;
+  }),
+];
 
 // Creates a user food entry when given a food name and ingredient list
 export const createUserFood = [
-  body('name')
-    .isString()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Food name must be between 1 & 100 characters.'),
+  body('name').isString().isLength({ min: 1, max: 100 }).withMessage('Food name must be between 1 & 100 characters.'),
   body('ingredientIds').isArray().isLength({ min: 1 }),
   body('ingredientIds.*').isInt(),
 
@@ -107,9 +113,7 @@ export const createUserFood = [
     const foodExists = await getUserFoodByName(foodName, userId);
 
     if (foodExists) {
-      res
-        .status(400)
-        .json({ err: `Food '${req.body.name}' already exists in table` });
+      res.status(400).json({ err: `Food '${req.body.name}' already exists in table` });
       return;
     }
 
@@ -120,15 +124,10 @@ export const createUserFood = [
       return;
     }
 
-    const isIngredientIdsValid = await verifyIngredientIdsInUserTable(
-      userIngredientIds,
-      req.body.ingredientIds
-    );
+    const isIngredientIdsValid = await verifyIngredientIdsInUserTable(userIngredientIds, req.body.ingredientIds);
 
     if (!isIngredientIdsValid) {
-      res
-        .status(400)
-        .json({ err: 'Not all ids exist in user ingredient table.' });
+      res.status(400).json({ err: 'Not all ids exist in user ingredient table.' });
       return;
     }
 
@@ -152,10 +151,7 @@ export const createUserFood = [
       );
 
       // Insert all ingredients into FoodIngredients.
-      const foodIngredients = await insertManyFoodIngredients(
-        foodObjects,
-        transaction
-      );
+      const foodIngredients = await insertManyFoodIngredients(foodObjects, transaction);
 
       // Check the length of the retured array and send response
       if (!foodIngredients || foodIngredients.length === 0) {
@@ -184,10 +180,7 @@ export const createUserFood = [
 // Updates a user food entry when given a food id, food name, and ingredient list
 export const updateUserFood = [
   param('foodId').isString().isNumeric(),
-  body('name')
-    .isString()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Food name must be between 1 & 100 characters.'),
+  body('name').isString().isLength({ min: 1, max: 100 }).withMessage('Food name must be between 1 & 100 characters.'),
   body('ingredientIds').isArray().isLength({ min: 1 }),
   body('ingredientIds.*').isInt(),
 
@@ -215,15 +208,10 @@ export const updateUserFood = [
       return;
     }
 
-    const isIngredientIdsValid = await verifyIngredientIdsInUserTable(
-      userIngredientIds,
-      req.body.ingredientIds
-    );
+    const isIngredientIdsValid = await verifyIngredientIdsInUserTable(userIngredientIds, req.body.ingredientIds);
 
     if (!isIngredientIdsValid) {
-      res
-        .status(400)
-        .json({ err: 'Not all ids exist in user ingredient table.' });
+      res.status(400).json({ err: 'Not all ids exist in user ingredient table.' });
       return;
     }
 
@@ -250,30 +238,18 @@ export const updateUserFood = [
       }
 
       // Get a list of ingredient ids for the specified food (before update)
-      const ingredientIdsInFoodList = await getIngredientListByFoodId(
-        Number(req.params.foodId)
-      );
+      const ingredientIdsInFoodList = await getIngredientListByFoodId(Number(req.params.foodId));
 
       // Get a list of ingredient ids that will no longer be associated with this food
-      const ingredientIdsToRemoveList = getIngredientsToRemoveList(
-        ingredientIdsInFoodList,
-        req.body.ingredientIds
-      );
+      const ingredientIdsToRemoveList = getIngredientsToRemoveList(ingredientIdsInFoodList, req.body.ingredientIds);
 
       // Remove the entries from foodIngredients table
       if (ingredientIdsToRemoveList.length > 0) {
-        await removeManyFoodIngredients(
-          Number(req.params.foodId),
-          ingredientIdsToRemoveList,
-          transaction
-        );
+        await removeManyFoodIngredients(Number(req.params.foodId), ingredientIdsToRemoveList, transaction);
       }
 
       // Get list of new ingredients that need to be added to foodIngredients table
-      const ingredientIdsToAddList = await getIngredientsToAddList(
-        ingredientIdsInFoodList,
-        req.body.ingredientIds
-      );
+      const ingredientIdsToAddList = await getIngredientsToAddList(ingredientIdsInFoodList, req.body.ingredientIds);
 
       // Create objects to be used for FoodIngredients insert
       const foodIngredientObjList = createFoodIngredientsObjectsForInsertion(
@@ -304,29 +280,27 @@ export const updateUserFood = [
 ];
 
 // Deletes a user food based on the user & food id - url
-export const deleteUserFood = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    // Check if the user food exists
-    const foodExists = await UserFoods.findByPk(req.params.foodId);
+export const deleteUserFood = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  // Check if the user food exists
+  const foodExists = await UserFoods.findByPk(req.params.foodId);
 
-    if (!foodExists) {
-      res.status(400).json({
-        err: `Cannot delete. Food does not exist in user food table`,
-      });
-      return;
-    }
-
-    try {
-      // Delete the UserFood entry
-      await removeUserFood(Number(req.params.foodId));
-
-      res.status(200).json({ msg: 'Successfully deleted user food.' });
-      return;
-    } catch (err) {
-      console.log(err);
-
-      res.status(400).json({ err: 'Error deleting user food.' });
-      return;
-    }
+  if (!foodExists) {
+    res.status(400).json({
+      err: `Cannot delete. Food does not exist in user food table`,
+    });
+    return;
   }
-);
+
+  try {
+    // Delete the UserFood entry
+    await removeUserFood(Number(req.params.foodId));
+
+    res.status(200).json({ msg: 'Successfully deleted user food.' });
+    return;
+  } catch (err) {
+    console.log(err);
+
+    res.status(400).json({ err: 'Error deleting user food.' });
+    return;
+  }
+});
