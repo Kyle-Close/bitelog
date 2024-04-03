@@ -84,7 +84,7 @@ export const getManyEatLogs = async (
     return await EatLogs.findAll({
       where: {
         JournalId: journalId,
-        createdAt: { [Op.between]: [fromDate, toDate] },
+        logTimestamp: { [Op.between]: [fromDate, toDate] },
       },
     });
   } catch (err) {
