@@ -47,7 +47,7 @@ export const getManyReportLogs = asyncHandler(
 
     try {
       const reportLogs = await ReportLogs.findAll({
-        where: { createdAt: { [Op.between]: [fromDate, toDate] } },
+        where: { logTimestamp: { [Op.between]: [fromDate, toDate] } },
       });
 
       if (!reportLogs) {
