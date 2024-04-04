@@ -109,11 +109,13 @@ export const updateJournalEatLogEntry = async (
   logId: number,
   journalId: number,
   notes: string,
+  logTimestamp: string,
   transaction: Transaction
 ) => {
   try {
     return await EatLogs.update(
       {
+        logTimestamp,
         notes,
       },
       {
@@ -186,4 +188,25 @@ export function convertDateQueryParamToDate(from: string) {
   // input - 2024-02-11
   const parts = from.split('-');
   return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+}
+
+export function getFoodIdsThatUpdatedQuantity(
+  originalFoodDataValues: {
+    EatLogId: number;
+    quantity: number;
+    UserFoodId: number;
+  }[],
+  foods: { id: number; quantity: number }[]
+) {
+  const resultList: number[] = [];
+  originalFoodDataValues.forEach((originalFood) => {
+    const updatingFood = foods.find(
+      (food) => food.id === originalFood.UserFoodId
+    );
+    if (!updatingFood) return;
+
+    if (updatingFood.quantity !== originalFood.quantity)
+      resultList.push(originalFood.UserFoodId);
+  });
+  return resultList;
 }

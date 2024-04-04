@@ -15,6 +15,7 @@ import {
   getEatLogUserFoodObjList,
   addQuantitiesToUserFoodIdList,
   deleteManyEatLogUserFoods,
+  getFoodIdsThatUpdatedQuantity,
 } from './helpers';
 import { sequelize } from '../../db';
 import { convertDateQueryParamToDate } from './helpers';
@@ -169,6 +170,7 @@ export const createEatLogEntry = [
 
 // Updates a EatFood entry given log ID, journal ID, food ID list, and notes (optional)
 export const updateEatLogEntry = [
+  body('logTimestamp').isISO8601().withMessage('Must be a valid ISO8601 date'),
   body('notes').isString(),
   body('foods').custom((value) => Array.isArray(value) && value.length > 0),
   body('foods.*.id').isNumeric(),
@@ -182,13 +184,15 @@ export const updateEatLogEntry = [
       return;
     }
 
+    const logTimestamp = req.body.logTimestamp;
     const userId = res.locals.uid;
     const journalId = res.locals.journal.id;
     const eatLogId = Number(req.params.eatLogId);
     const notes: string = req.body.notes;
+    const foods: { id: number; quantity: number }[] = req.body.foods;
 
     // Get list of food ids from body
-    const postFoodIds: number[] = getFoodIdList(req.body.foods);
+    const postFoodIds: number[] = getFoodIdList(foods);
 
     // Get list of all UserFood instances
     const userFoodInstances = await getAllUserFoods(userId);
@@ -217,15 +221,27 @@ export const updateEatLogEntry = [
       (dataValue) => dataValue.UserFoodId
     );
 
-    // Returns list of food ids that need to be added to EatLogUserFoods
+    // Returns list of food ids that were not previously in the log
     const userFoodIdsToAdd = postFoodIds.filter(
       (id) => !preUserFoodIds.includes(id)
     );
+
+    // Returns list of any food ids that had their quantity changed
+    const updatedQuantityUserFoodIds = getFoodIdsThatUpdatedQuantity(
+      preLogUserFoodDataValues,
+      foods
+    );
+
+    // Add list from last step to the list of ids to add
+    userFoodIdsToAdd.push(...updatedQuantityUserFoodIds);
 
     // Returns a list food ids that need to be removed from EatLogUserFoods
     const userFoodIdsToRemove = preUserFoodIds.filter(
       (id) => !postFoodIds.includes(id)
     );
+
+    // Add list of quantity change foods to ids to remove
+    userFoodIdsToRemove.push(...updatedQuantityUserFoodIds);
 
     // --- Begin Transaction ---
     const transaction = await sequelize.transaction();
@@ -236,17 +252,9 @@ export const updateEatLogEntry = [
         eatLogId,
         journalId,
         notes,
+        logTimestamp,
         transaction
       );
-
-      if (userFoodIdsToAdd.length > 0) {
-        // Bulk insert the missing EatLogUserFood entries
-        const eatLogUserFoodObjList = getEatLogUserFoodObjList(
-          eatLogId,
-          addQuantitiesToUserFoodIdList(userFoodIdsToAdd, req.body.foods)
-        );
-        await insertManyEatLogUserFoods(eatLogUserFoodObjList, transaction);
-      }
 
       if (userFoodIdsToRemove.length > 0) {
         // Remove all the entries with these ids
@@ -255,6 +263,15 @@ export const updateEatLogEntry = [
           eatLogId,
           transaction
         );
+      }
+
+      if (userFoodIdsToAdd.length > 0) {
+        // Bulk insert the missing EatLogUserFood entries
+        const eatLogUserFoodObjList = getEatLogUserFoodObjList(
+          eatLogId,
+          addQuantitiesToUserFoodIdList(userFoodIdsToAdd, req.body.foods)
+        );
+        await insertManyEatLogUserFoods(eatLogUserFoodObjList, transaction);
       }
 
       // --- Commit Transaction ---
