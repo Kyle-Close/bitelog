@@ -7,7 +7,7 @@ const ReportLogs = sequelize.define(
     discomfortRating: {
       type: DataTypes.ENUM,
       values: ['1', '2', '3', '4', '5'],
-      allowNull: false,
+      allowNull: true,
     },
     notes: {
       type: DataTypes.TEXT,

@@ -70,7 +70,7 @@ export const getManyReportLogs = asyncHandler(
 
 // Create a single report log entry in journal for user.
 export const createReportLog = [
-  body('discomfortRating').exists().isString().isNumeric(),
+  body('discomfortRating').optional().isString().isNumeric(),
   body('logTimestamp').isISO8601().withMessage('Must be a valid ISO8601 date'),
   body('notes').exists().isString().isLength({ min: 1, max: 1000 }),
 
@@ -86,7 +86,7 @@ export const createReportLog = [
       const reportLogInstance = await ReportLogs.create(
         {
           JournalId: res.locals.journal.id,
-          discomfortRating: req.body.discomfortRating,
+          discomfortRating: req.body.discomfortRating || null,
           notes: req.body.notes,
           logTimestamp: req.body.logTimestamp,
         },
