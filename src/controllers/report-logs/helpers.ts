@@ -3,11 +3,13 @@ import ReportLogs from '../../models/report_log';
 export const updateReportLogInstance = async (
   logId: number,
   discomfortRating: string,
-  notes: string
+  notes: string,
+  logTimestamp: string
 ) => {
   try {
     return await ReportLogs.update(
       {
+        logTimestamp,
         discomfort_rating: discomfortRating,
         notes: notes,
       },

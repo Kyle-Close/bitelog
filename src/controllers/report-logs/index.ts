@@ -110,14 +110,16 @@ export const createReportLog = [
 
 // Update a single report log entry in journal for user.
 export const updateReportLog = [
-  body('discomfortRating').exists().isString().isNumeric(),
+  body('logTimestamp').isISO8601().withMessage('Must be a valid ISO8601 date'),
+  body('discomfortRating').optional().isString().isNumeric(),
   body('notes').exists().isString().isLength({ min: 1, max: 1000 }),
 
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     const logId = Number(req.params.reportLogId);
-    const discomfortRating = req.body.discomfortRating;
+    const discomfortRating = req.body.discomfortRating || null;
     const notes = req.body.notes;
+    const logTimestamp = req.body.logTimestamp;
 
     if (!errors.isEmpty()) {
       res.status(400).json({ err: errors.array() });
@@ -128,7 +130,8 @@ export const updateReportLog = [
       const reportLogInstance = await updateReportLogInstance(
         logId,
         discomfortRating,
-        notes
+        notes,
+        logTimestamp
       );
 
       res
