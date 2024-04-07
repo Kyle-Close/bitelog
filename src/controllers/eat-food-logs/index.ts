@@ -109,6 +109,12 @@ export const createEatLogEntry = [
     const journalId = res.locals.journal.id;
     const notes: string = req.body.notes;
     const logTimestamp = req.body.logTimestamp;
+    const foods = req.body.foods;
+
+    if (!foods || foods.length < 1) {
+      res.status(400).json({ err: 'Eat log must contain at least 1 food.' });
+      return;
+    }
 
     // Get list of food ids to update to - from body
     const foodIds: number[] = getFoodIdList(req.body.foods);

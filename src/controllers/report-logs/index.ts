@@ -117,7 +117,7 @@ export const updateReportLog = [
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     const logId = Number(req.params.reportLogId);
-    const discomfortRating = req.body.discomfortRating || null;
+    const discomfortRating = req.body.discomfortRating;
     const notes = req.body.notes;
     const logTimestamp = req.body.logTimestamp;
 
